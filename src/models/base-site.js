@@ -30,16 +30,20 @@ class BaseSite {
     return 0
   }
 
-  _queryAny(query, selectorList) {
-    // this function will return the first non-empty result of the selectors
-    // or the last one
-    for (let i = 0; i < selectorList.length; i++) {
-      if (query(selectorList[i]).length > 0) {
-        return query(selectorList[i])
-      }
-    }
-    return query(selectorList[selectorList.length - 1])
+  _booleanParser (query, selector) {
+    return query.find(selector) ? true : false
   }
+
+  // _queryAny(query, selectorList) {
+  //   // this function will return the first non-empty result of the selectors
+  //   // or the last one
+  //   for (let i = 0; i < selectorList.length; i++) {
+  //     if (query(selectorList[i]).length > 0) {
+  //       return query(selectorList[i])
+  //     }
+  //   }
+  //   return query(selectorList[selectorList.length - 1])
+  // }
 }
 
 module.exports = BaseSite
