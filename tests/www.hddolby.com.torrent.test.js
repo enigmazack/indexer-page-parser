@@ -7,4 +7,14 @@ const dom = new JSDOM(html)
 
 const $ = require( 'jquery' )(dom.window)
 
-module.exports = $
+// module.exports = $
+
+const NexusPhpSite = require('../src/models/nexusphp-site')
+
+const hddolby = new NexusPhpSite({
+  name: 'www.hddolby.com'
+})
+
+const results = hddolby.pageParser($, 'https://www.hddolby.com/torrents.php')
+
+console.log(results)
