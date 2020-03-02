@@ -1,5 +1,5 @@
-const sites = require('../pages/request.pages.config.json').sites
-const proxy = require('../pages/request.pages.config.json').proxy
+const sites = require('../pages/request-pages-config.json').sites
+const proxy = require('../pages/request-pages-config.json').proxy
 const axios = require('axios')
 const HttpsProxyAgent = require('https-proxy-agent')
 const _ = require('lodash')

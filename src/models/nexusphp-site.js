@@ -1,11 +1,11 @@
 const BaseSite = require('./base-site')
 
 class NexusPhpSite extends BaseSite {
-  constructor (config) {
+  constructor(config) {
     super(config)
   }
 
-  pageParser (query, url) {
+  pageParser(query, url) {
     const path = new URL(url).pathname
     switch (path) {
       case '/index.php':
@@ -14,21 +14,23 @@ class NexusPhpSite extends BaseSite {
         return this._torrentPageParser(query)
       case '/userdetails.php':
         return this._userPageParser(query)
-      // case '/getusertorrentlistajax.php':
-      //   return this._seedingPageParser(query)
+        // case '/getusertorrentlistajax.php':
+        //   return this._seedingPageParser(query)
       default:
         return {}
     }
   }
 
-  _indexPageParser (query) {
+  _indexPageParser(query) {
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     // const userName = userQuery.text()
     const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
-    return { userId }
+    return {
+      userId
+    }
   }
 
-  _userPageParser (query) {
+  _userPageParser(query) {
     // parse user name
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     const userName = userQuery.text()
@@ -70,7 +72,7 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _parseSeedingTorrents (query) {
+  _parseSeedingTorrents(query) {
     // seeding torrent table is similar to torrent table of page
     // refer to this._torrentPageParser
     if (query.find('table').length == 0) {
@@ -91,7 +93,7 @@ class NexusPhpSite extends BaseSite {
     return torrentList
   }
 
-  _torrentPageParser (query) {
+  _torrentPageParser(query) {
     // return [] if nothing found
     if (/没有种子|沒有種子|Nothing found/.test(query('body').text())) {
       return []
@@ -115,9 +117,7 @@ class NexusPhpSite extends BaseSite {
       // parse promotion status
       const promotion = this._parsePromotion(tdList.eq(index.title))
       torrent.isFreeleech = promotion.isFreeleech
-      if (promotion.hasOwnProperty('deadline')) {
-        torrent.promotionDeadline = promotion.deadline
-      }        
+      torrent.promotionDeadline = promotion.deadline || 0
       // parse tags other than promotion
       const tags = this._parseTags(tdList.eq(index.title))
       if (promotion.hasOwnProperty('type')) {
@@ -149,32 +149,46 @@ class NexusPhpSite extends BaseSite {
     return torrentList
   }
 
-  _parseStatusDefault (query) {
+  _parseStatusDefault(query) {
     const isActive = /peer-active/.test(query.attr('class'))
-    const progress = /--/.test(query.text()) ? 0 : parseFloat(query.text())
+    const progress = /-/.test(query.text()) ? 0 : parseFloat(query.text())
     let status = ''
     if (isActive) {
       status = progress == 100 ? 'Seeding' : 'Leeching'
     } else {
       status = progress == 100 ? 'Snatched' : 'Stopped'
     }
-    return { status, progress }
+    status = /-/.test(query.text()) ? '' : status
+    return {
+      status,
+      progress
+    }
   }
 
-  _parseStatus (query) {
-    return { status: '', progress: 0}
+  _parseStatus(query) {
+    return {
+      status: '',
+      progress: 0
+    }
   }
 
-  _parseSubTitle (query) {
+  _parseSubTitle(query) {
     const subTitleQuery = query.find('a[href*="details.php?id="]').parent()
     return subTitleQuery.html().split('>').pop()
   }
 
-  _parseTags (query) {
-    return []
+  _parseTags(query) {
+    const tags = []
+    // switch (true) {
+    //   case query.find('img[alt*="Sticky"]'):
+    //     tags.push('Sticky')
+    //     break
+    //   default:
+    // }
+    return tags
   }
 
-  _parsePromotion (query) {
+  _parsePromotion(query) {
     const promotion = {}
     let type = ''
     let isFreeleech = false
@@ -212,7 +226,7 @@ class NexusPhpSite extends BaseSite {
     return promotion
   }
 
-  _parseTableHead (query) {
+  _parseTableHead(query) {
     // parse table head to get index of different columns
     const tdList = query.find('> td')
     const index = {}
@@ -227,9 +241,9 @@ class NexusPhpSite extends BaseSite {
         case /(进度|進度|DL%)/.test(tdList.eq(i).text()):
           index.status = i
           break
-        // case  tdList.eq(i).find('img.comments').length == 1:
-        //   index.comments = i
-        //   break
+          // case  tdList.eq(i).find('img.comments').length == 1:
+          //   index.comments = i
+          //   break
         case tdList.eq(i).find('img.time').length == 1:
           index.date = i
           break
@@ -251,7 +265,7 @@ class NexusPhpSite extends BaseSite {
     return index
   }
 
-  _seedingPageParser (query) {
+  _seedingPageParser(query) {
 
   }
 }

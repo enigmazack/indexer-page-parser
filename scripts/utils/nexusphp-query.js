@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const { JSDOM } = require('jsdom')
 
-const assemble = (name) => {
+const getQueries = (name) => {
   const indexHtml = fs.readFileSync(path.join(__dirname, `../../pages/${name}/index.html`))
   const userHtml = fs.readFileSync(path.join(__dirname, `../../pages/${name}/user.html`))
   const seedingHtml = fs.readFileSync(path.join(__dirname, `../../pages/${name}/seeding.html`))
@@ -24,4 +24,4 @@ const assemble = (name) => {
   return query
 }
 
-module.exports = assemble
+module.exports = getQueries

@@ -31,7 +31,7 @@ class BaseSite {
   }
 
   _booleanParser (query, selector) {
-    return query.find(selector) ? true : false
+    return query.find(selector).length ? true : false
   }
 
   // _queryAny(query, selectorList) {
