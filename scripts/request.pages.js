@@ -26,21 +26,25 @@ _.forEach(sites, (site, name) => {
   }
   const request = axios.create(requestConfig)
   _.forEach(site.pages, (page, key) => {
-    const filePath = path.join(__dirname, `../pages/${name}.${key}.html`)
+    const filePath = path.join(__dirname, `../pages/${name}/${key}.html`)
+    const dirPath = path.dirname(filePath)
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath)
+    }
     if (fs.existsSync(filePath)) {
-      console.log(`${name}.${key}: exists, skip`)
+      console.log(`${name}/${key}: skip`)
     } else {
       request(page)
         .then(res => {
           if (res.status == 200) {
             fs.writeFileSync(filePath, res.data)
-            console.log(`${name}.${key}: finished`)
+            console.log(`${name}/${key}: added`)
           } else {
-            console.log(`${name}.${key}: response code ${res.status}`)
+            console.log(`${name}/${key}: response code ${res.status}`)
           }
         })
         .catch(err => {
-          console.log(`${name}.${key}: request error ${err}`)
+          console.log(`${name}/${key}: ${err}`)
         })
     }
   })

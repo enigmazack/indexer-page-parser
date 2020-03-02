@@ -4,8 +4,8 @@ const path = require('path')
 const { JSDOM } = require('jsdom')
 
 const name = 'www.hdarea.co'
-const html = fs.readFileSync(path.join(__dirname, `../pages/${name}.user.html`))
-const htmlSeeding = fs.readFileSync(path.join(__dirname, `../pages/${name}.seeding.html`))
+const html = fs.readFileSync(path.join(__dirname, `../pages/${name}/user.html`))
+const htmlSeeding = fs.readFileSync(path.join(__dirname, `../pages/${name}/seeding.html`))
 const dom = new JSDOM(html)
 const window = dom.window
 const document = window.document

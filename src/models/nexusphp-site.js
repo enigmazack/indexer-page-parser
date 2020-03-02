@@ -24,7 +24,7 @@ class NexusPhpSite extends BaseSite {
   _indexPageParser (query) {
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     // const userName = userQuery.text()
-    const userId = userQuery.attr('href').match(/id=(\d+)/)[1]
+    const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
     return { userId }
   }
 
