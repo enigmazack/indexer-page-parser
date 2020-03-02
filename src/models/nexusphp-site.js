@@ -14,8 +14,8 @@ class NexusPhpSite extends BaseSite {
         return this._torrentPageParser(query)
       case '/userdetails.php':
         return this._userPageParser(query)
-      case '/getusertorrentlistajax.php':
-        return this._seedingPageParser(query)
+      // case '/getusertorrentlistajax.php':
+      //   return this._seedingPageParser(query)
       default:
         return {}
     }
@@ -56,14 +56,39 @@ class NexusPhpSite extends BaseSite {
     ).next()
     let joinDate = joinDateQuery.text().match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)[0]
     joinDate = new Date(joinDate).getTime()
+    // parse seeding torrents
+    const seedingTorrentsQuery = query('#ka1')
+    const seedingTorrents = this._parseSeedingTorrents(seedingTorrentsQuery)
     return {
       userName,
       userClass,
       uploadTraffic,
       downloadTraffic,
       bonus,
-      joinDate
+      joinDate,
+      seedingTorrents
     }
+  }
+
+  _parseSeedingTorrents (query) {
+    // seeding torrent table is similar to torrent table of page
+    // refer to this._torrentPageParser
+    if (query.find('table').length == 0) {
+      return []
+    }
+    const torrentList = []
+    const table = query.find('table')
+    const trList = table.find('> tbody > tr')
+    const index = this._parseTableHead(trList.eq(0))
+    for (let i = 1; i < trList.length; i++) {
+      const torrent = {}
+      const tdList = trList.eq(i).find('> td')
+      const titleQuery = tdList.eq(index.title).find('a[href*="details.php?id="]')
+      torrent.id = titleQuery.attr('href').match(/id=(\d+)/)[1]
+      torrent.size = this._parseSize(tdList.eq(index.size).text())
+      torrentList.push(torrent)
+    }
+    return torrentList
   }
 
   _torrentPageParser (query) {
@@ -200,6 +225,10 @@ class NexusPhpSite extends BaseSite {
       }
     }
     return index
+  }
+
+  _seedingPageParser (query) {
+
   }
 }
 
