@@ -2,9 +2,19 @@ const fs = require('fs')
 const path = require('path')
 const { JSDOM } = require('jsdom')
 
-const html = fs.readFileSync(path.join(__dirname, '../pages/www.hddolby.com.index.html'))
+const name = 'www.hddolby.com'
+
+const html = fs.readFileSync(path.join(__dirname, `../pages/${name}.index.html`))
 const dom = new JSDOM(html)
 
 const $ = require( 'jquery' )(dom.window)
 
-module.exports = $
+// module.exports = $
+
+const NexusPhpSite = require('../src/models/nexusphp-site')
+
+const site = new NexusPhpSite({ name })
+
+const results = site.pageParser($, `https://${name}/index.php`)
+
+console.log(results)

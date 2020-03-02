@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const { JSDOM } = require('jsdom')
 
-const name = 'www.hddolby.com'
+const name = 'www.hdarea.co'
 
 const html = fs.readFileSync(path.join(__dirname, `../pages/${name}.user.html`))
 const htmlSeeding = fs.readFileSync(path.join(__dirname, `../pages/${name}.seeding.html`))
@@ -32,8 +32,8 @@ const $ = require('jquery')(window)
 
 const NexusPhpSite = require('../src/models/nexusphp-site')
 
-const hdarea = new NexusPhpSite({ name })
+const site = new NexusPhpSite({ name })
 
-const results = hdarea.pageParser($, `https://${name}/userdetails.php`)
+const results = site.pageParser($, `https://${name}/userdetails.php`)
 
 console.log(results)
