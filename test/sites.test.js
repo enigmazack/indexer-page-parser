@@ -1,6 +1,7 @@
 const nameList = [
   'www.hddolby.com',
-  'www.hdarea.co'
+  'www.hdarea.co',
+  'ourbits.club'
 ]
 const should = require('chai').should()
 const pageParser = require('../src/index')

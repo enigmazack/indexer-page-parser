@@ -1,5 +1,6 @@
 const hddolby = require('./sites/hddolby')
 const hdarea = require('./sites/hdarea')
+const ourbits = require('./sites/ourbits')
 
 const pageParser = (query, url) => {
   const site = new URL(url).hostname
@@ -8,6 +9,8 @@ const pageParser = (query, url) => {
       return hddolby.pageParser(query, url)
     case 'www.hdarea.co':
       return hdarea.pageParser(query, url)
+    case 'ourbits.club':
+      return ourbits.pageParser(query, url)
     default:
       return {}
   }

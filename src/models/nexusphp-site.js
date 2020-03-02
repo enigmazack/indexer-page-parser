@@ -149,19 +149,25 @@ class NexusPhpSite extends BaseSite {
 
   _parseStatus(query, index) {
     if (index.hasOwnProperty('status')) {
-      const statusQuery = query.eq(index.status)
-      const isActive = /peer-active/.test(statusQuery.attr('class'))
-      const progress = /-/.test(statusQuery.text()) ? 0 : parseFloat(statusQuery.text())
+      const text = query.eq(index.status).text()
+      const isActive = /peer-active/.test(query.eq(index.status).attr('class'))
+      const progress = /-/.test(text) ? 0 : parseFloat(text)
       let status = ''
       if (isActive) {
         status = progress == 100 ? 'Seeding' : 'Leeching'
       } else {
         status = progress == 100 ? 'Snatched' : 'Stopped'
       }
-      status = /-/.test(statusQuery.text()) ? '' : status
-      return { status, progress }
+      status = /-/.test(text) ? '' : status
+      return {
+        status,
+        progress
+      }
     } else {
-      return { status: '', progress: 0 }
+      return {
+        status: '',
+        progress: 0
+      }
     }
   }
 
