@@ -1,11 +1,9 @@
-
-
+const pageParser = require('../src/index')
 const fs = require('fs')
 const path = require('path')
 const { JSDOM } = require('jsdom')
 
 const name = 'www.hdarea.co'
-
 const html = fs.readFileSync(path.join(__dirname, `../pages/${name}.user.html`))
 const htmlSeeding = fs.readFileSync(path.join(__dirname, `../pages/${name}.seeding.html`))
 const dom = new JSDOM(html)
@@ -25,15 +23,6 @@ const document = window.document
 if (document.getElementById('ka1').innerHTML == "") {
   document.getElementById('ka1').innerHTML = htmlSeeding
 }
-
 const $ = require('jquery')(window)
-
-// module.exports = $
-
-const NexusPhpSite = require('../src/models/nexusphp-site')
-
-const site = new NexusPhpSite({ name })
-
-const results = site.pageParser($, `https://${name}/userdetails.php`)
-
+const results = pageParser($, `https://${name}/userdetails.php`)
 console.log(results)
