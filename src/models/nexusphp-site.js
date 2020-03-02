@@ -84,7 +84,7 @@ class NexusPhpSite extends BaseSite {
       const torrent = {}
       const tdList = trList.eq(i).find('> td')
       const titleQuery = tdList.eq(index.title).find('a[href*="details.php?id="]')
-      torrent.id = titleQuery.attr('href').match(/id=(\d+)/)[1]
+      torrent.id = parseInt(titleQuery.attr('href').match(/id=(\d+)/)[1])
       torrent.size = this._parseSize(tdList.eq(index.size).text())
       torrentList.push(torrent)
     }
@@ -135,10 +135,34 @@ class NexusPhpSite extends BaseSite {
       torrent.leeches = parseInt(tdList.eq(index.leeches).text())
       // parse snatched
       torrent.snatched = parseInt(tdList.eq(index.snatched).text())
+      // parse status
+      let status = {}
+      if (index.hasOwnProperty('status')) {
+        status = this._parseStatusDefault(tdList.eq(index.status))
+      } else {
+        status = this._parseStatus(tdList.eq(index.title))
+      }
+      Object.assign(torrent, status)
       // push torrent info into torrentList
       torrentList.push(torrent)
     }
     return torrentList
+  }
+
+  _parseStatusDefault (query) {
+    const isActive = /peer-active/.test(query.attr('class'))
+    const progress = /--/.test(query.text()) ? 0 : parseFloat(query.text())
+    let status = ''
+    if (isActive) {
+      status = progress == 100 ? 'Seeding' : 'Leeching'
+    } else {
+      status = progress == 100 ? 'Snatched' : 'Stopped'
+    }
+    return { status, progress }
+  }
+
+  _parseStatus (query) {
+    return { status: '', progress: 0}
   }
 
   _parseSubTitle (query) {
