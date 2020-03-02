@@ -1,3 +1,4 @@
+// This script requst the pages and write to file
 const sites = require('../pages/request-pages-config.json').sites
 const proxy = require('../pages/request-pages-config.json').proxy
 const axios = require('axios')

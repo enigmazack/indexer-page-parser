@@ -1,11 +1,11 @@
 const BaseSite = require('./base-site')
 
 class NexusPhpSite extends BaseSite {
-  constructor(config) {
+  constructor (config) {
     super(config)
   }
 
-  pageParser(query, url) {
+  pageParser (query, url) {
     const path = new URL(url).pathname
     switch (path) {
       case '/index.php':
@@ -14,14 +14,12 @@ class NexusPhpSite extends BaseSite {
         return this._torrentPageParser(query)
       case '/userdetails.php':
         return this._userPageParser(query)
-        // case '/getusertorrentlistajax.php':
-        //   return this._seedingPageParser(query)
       default:
         return {}
     }
   }
 
-  _indexPageParser(query) {
+  _indexPageParser (query) {
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     // const userName = userQuery.text()
     const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
@@ -30,7 +28,7 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _userPageParser(query) {
+  _userPageParser (query) {
     // parse user name
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     const userName = userQuery.text()
@@ -72,7 +70,7 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _parseSeedingTorrents(query) {
+  _parseSeedingTorrents (query) {
     // seeding torrent table is similar to torrent table of page
     // refer to this._torrentPageParser
     if (query.find('table').length == 0) {
@@ -93,7 +91,7 @@ class NexusPhpSite extends BaseSite {
     return torrentList
   }
 
-  _torrentPageParser(query) {
+  _torrentPageParser (query) {
     // return [] if nothing found
     if (/没有种子|沒有種子|Nothing found/.test(query('body').text())) {
       return []
@@ -136,12 +134,12 @@ class NexusPhpSite extends BaseSite {
       // parse snatched
       torrent.snatched = parseInt(tdList.eq(index.snatched).text())
       // parse status
-      let status = {}
-      if (index.hasOwnProperty('status')) {
-        status = this._parseStatusDefault(tdList.eq(index.status))
-      } else {
-        status = this._parseStatus(tdList.eq(index.title))
-      }
+      const status = this._parseStatus(tdList, index)
+      // if (index.hasOwnProperty('status')) {
+      //   status = this._parseStatusDefault(tdList.eq(index.status))
+      // } else {
+      //   status = this._parseStatus(tdList.eq(index.title))
+      // }
       Object.assign(torrent, status)
       // push torrent info into torrentList
       torrentList.push(torrent)
@@ -149,7 +147,7 @@ class NexusPhpSite extends BaseSite {
     return torrentList
   }
 
-  _parseStatusDefault(query) {
+  _parseStatusDefault (query) {
     const isActive = /peer-active/.test(query.attr('class'))
     const progress = /-/.test(query.text()) ? 0 : parseFloat(query.text())
     let status = ''
@@ -165,30 +163,25 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _parseStatus(query) {
+  _parseStatus (query) {
     return {
       status: '',
       progress: 0
     }
   }
 
-  _parseSubTitle(query) {
+  _parseSubTitle (query) {
     const subTitleQuery = query.find('a[href*="details.php?id="]').parent()
     return subTitleQuery.html().split('>').pop()
   }
 
-  _parseTags(query) {
+  _parseTags (query) {
     const tags = []
-    // switch (true) {
-    //   case query.find('img[alt*="Sticky"]'):
-    //     tags.push('Sticky')
-    //     break
-    //   default:
-    // }
+    if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
     return tags
   }
 
-  _parsePromotion(query) {
+  _parsePromotion (query) {
     const promotion = {}
     let type = ''
     let isFreeleech = false
@@ -226,7 +219,7 @@ class NexusPhpSite extends BaseSite {
     return promotion
   }
 
-  _parseTableHead(query) {
+  _parseTableHead (query) {
     // parse table head to get index of different columns
     const tdList = query.find('> td')
     const index = {}
@@ -263,10 +256,6 @@ class NexusPhpSite extends BaseSite {
       }
     }
     return index
-  }
-
-  _seedingPageParser(query) {
-
   }
 }
 

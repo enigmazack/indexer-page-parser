@@ -1,5 +1,5 @@
-const hddolby = require('./sites/www.hddolby.com')
-const hdarea = require('./sites/www.hdarea.co')
+const hddolby = require('./sites/hddolby')
+const hdarea = require('./sites/hdarea')
 
 const pageParser = (query, url) => {
   const site = new URL(url).hostname

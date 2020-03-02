@@ -1,5 +1,5 @@
 class BaseSite {
-  constructor(config) {
+  constructor (config) {
     this.name = config.name || ''
   }
 
