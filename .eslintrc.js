@@ -27,5 +27,8 @@ module.exports = {
           "varsIgnorePattern": "should|expect"
         }
       ]
-    }
+    },
+    "ignorePatterns": [
+      "pages/"
+    ]
 };

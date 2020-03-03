@@ -11,7 +11,7 @@ ourbits._parseTags = (query) => {
   if (query.find('div.tag-diy').length) tags.push('DIY')
   if (query.find('div.tag-gy').length) tags.push('ChineseAudio')
   if (query.find('div.tag-zz').length) tags.push('ChineseSubtitles')
-  if (query.find('div.tag-jz').length) tags.push('KeepInside')
+  if (query.find('div.tag-jz').length) tags.push('Exclusive')
   if (query.find('div.tag-sf').length) tags.push('FirstRelease')
   return tags
 }

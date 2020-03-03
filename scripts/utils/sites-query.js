@@ -5,6 +5,7 @@ const getQueries = (name) => {
     case 'www.hddolby.com':
     case 'www.hdarea.co':
     case 'ourbits.club':
+    case 'springsunday.net':
       return getNexusphpQueries(name)
     default:
       return {}

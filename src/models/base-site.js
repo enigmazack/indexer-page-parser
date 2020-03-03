@@ -3,6 +3,10 @@ class BaseSite {
     this.name = config.name || ''
   }
 
+  _parseNumber (numberString) {
+    return parseFloat(numberString.replace(/[, ]/g, ''))
+  }
+
   _parseSize (sizeString) {
     const sizeMatch = sizeString.match(/^(\d*\.?\d+)(.*[^ZEPTGMK])?([ZEPTGMK](B|iB))$/i)
     if (sizeMatch) {
@@ -34,16 +38,16 @@ class BaseSite {
     return !!query.find(selector).length
   }
 
-  // _queryAny(query, selectorList) {
-  //   // this function will return the first non-empty result of the selectors
-  //   // or the last one
-  //   for (let i = 0; i < selectorList.length; i++) {
-  //     if (query(selectorList[i]).length > 0) {
-  //       return query(selectorList[i])
-  //     }
-  //   }
-  //   return query(selectorList[selectorList.length - 1])
-  // }
+  _queryAny (query, selectorList) {
+    // this function will return the first non-empty result of the selectors
+    // or the last one
+    for (let i = 0; i < selectorList.length; i++) {
+      if (query.find(selectorList[i]).length > 0) {
+        return query.find(selectorList[i])
+      }
+    }
+    return query.find(selectorList[selectorList.length - 1])
+  }
 }
 
 module.exports = BaseSite

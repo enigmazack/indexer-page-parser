@@ -46,10 +46,13 @@ class NexusPhpSite extends BaseSite {
     let downloadTraffic = ratioQuery.text().match(/(下[载載]量|Downloaded).+?([\d.]+ ?[ZEPTGMK]?B)/)[2]
     downloadTraffic = this._parseSize(downloadTraffic)
     // parse bonus
-    const bonusQuery = query(
-      'td.rowhead:contains("魔力"), td.rowhead:contains("Karma")'
-    ).next()
-    const bonus = parseFloat(bonusQuery.text())
+    const bonusQuery = this._queryAny(query('body'), [
+      'td.rowhead:contains("魔力")',
+      'td.rowhead:contains("Karma")',
+      'td.rowhead:contains("积分")',
+      'td.rowhead:contains("積分")'
+    ]).next()
+    const bonus = this._parseBonus(bonusQuery)
     // parse join date
     const joinDateQuery = query(
       'td.rowhead:contains("加入日期"), td.rowhead:contains("Join")'
@@ -68,6 +71,10 @@ class NexusPhpSite extends BaseSite {
       joinDate,
       seedingTorrents
     }
+  }
+
+  _parseBonus (query) {
+    return this._parseNumber(query.text())
   }
 
   _parseSeedingTorrents (query) {
