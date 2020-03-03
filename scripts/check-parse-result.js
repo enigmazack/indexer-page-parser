@@ -4,7 +4,7 @@
 const process = require('process')
 const pageParser = require('../src/index')
 const getQueries = require('./utils/sites-query')
-const sitesConfig = require('../pages/request-pages-config.json').sites
+const sitesConfig = require('../pages/request-config.json').sites
 
 const name = process.argv[2]
 const pageType = process.argv[3]
