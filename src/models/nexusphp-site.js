@@ -20,11 +20,15 @@ class NexusPhpSite extends BaseSite {
   }
 
   _indexPageParser (query) {
+    // parse user id
     const userQuery = query('a[href*="userdetails.php?id="]').first()
-    // const userName = userQuery.text()
     const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
+    // parse unread message
+    const messageQuery = query('a[href*="messages.php"]').first().parent()
+    const unreadMessage = parseInt(messageQuery.text().match(/\((\d+).+(新|New)\)/)[1])
     return {
-      userId
+      userId,
+      unreadMessage
     }
   }
 
@@ -142,11 +146,6 @@ class NexusPhpSite extends BaseSite {
       torrent.snatched = parseInt(tdList.eq(index.snatched).text())
       // parse status
       const status = this._parseStatus(tdList, index)
-      // if (index.hasOwnProperty('status')) {
-      //   status = this._parseStatusDefault(tdList.eq(index.status))
-      // } else {
-      //   status = this._parseStatus(tdList.eq(index.title))
-      // }
       Object.assign(torrent, status)
       // push torrent info into torrentList
       torrentList.push(torrent)
@@ -159,20 +158,13 @@ class NexusPhpSite extends BaseSite {
       const text = query.eq(index.status).text()
       const isActive = /peer-active/.test(query.eq(index.status).attr('class'))
       const progress = /-/.test(text) ? 0 : parseFloat(text)
-      let status = ''
-      if (isActive) {
-        status = progress === 100 ? 'Seeding' : 'Leeching'
-      } else {
-        status = progress === 100 ? 'Snatched' : 'Stopped'
-      }
-      status = /-/.test(text) ? '' : status
       return {
-        status,
+        isActive,
         progress
       }
     } else {
       return {
-        status: '',
+        isActive: false,
         progress: 0
       }
     }

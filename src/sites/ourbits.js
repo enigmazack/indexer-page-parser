@@ -20,15 +20,8 @@ ourbits._parseStatus = (query, index) => {
   const isActive = !!query.eq(index.title).find('div.doing').length
   const text = query.eq(index.status).text()
   const progress = /-/.test(text) ? 0 : parseFloat(text)
-  let status = ''
-  if (isActive) {
-    status = progress === 100 ? 'Seeding' : 'Leeching'
-  } else {
-    status = progress === 100 ? 'Snatched' : 'Stopped'
-  }
-  status = /-/.test(text) ? '' : status
   return {
-    status,
+    isActive,
     progress
   }
 }

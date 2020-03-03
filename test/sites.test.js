@@ -1,7 +1,8 @@
 const nameList = [
   'www.hddolby.com',
   'www.hdarea.co',
-  'ourbits.club'
+  'ourbits.club',
+  'springsunday.net'
 ]
 const should = require('chai').should()
 const pageParser = require('../src/index')
@@ -12,6 +13,7 @@ nameList.forEach(name => {
     it('should parse index.php', function () {
       const result = pageParser(query.index, `https://${name}/index.php`)
       result.should.have.property('userId').that.is.a('number')
+      result.should.have.property('unreadMessage').that.is.a('number')
     })
     it('should parse userdetails.php with seeding torrents', function () {
       const result = pageParser(query.user, `https://${name}/userdetails.php`)
@@ -42,7 +44,7 @@ nameList.forEach(name => {
         result[0].should.have.property('seeds').that.is.a('number')
         result[0].should.have.property('leeches').that.is.a('number')
         result[0].should.have.property('snatched').that.is.a('number')
-        result[0].should.have.property('status').that.is.oneOf(['Seeding', 'Leeching', 'Snatched', 'Stopped', ''])
+        result[0].should.have.property('isActive').that.is.oneOf([true, false])
         result[0].should.have.property('progress').that.is.a('number')
       }
     })
