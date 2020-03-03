@@ -15,7 +15,7 @@ _.forEach(sites, (site, name) => {
   }
   // add proxy config
   if (site.enableProxy) {
-    if (new URL(site.url).protocol == 'https:') {
+    if (new URL(site.url).protocol === 'https:') {
       const agent = new HttpsProxyAgent(proxy)
       requestConfig.httpsAgent = agent
     } else {
@@ -37,7 +37,7 @@ _.forEach(sites, (site, name) => {
     } else {
       request(page)
         .then(res => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             fs.writeFileSync(filePath, res.data)
             console.log(`${name}/${key}: added`)
           } else {

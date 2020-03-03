@@ -8,12 +8,12 @@ const pageParser = require('../src/index')
 
 nameList.forEach(name => {
   const query = require('../scripts/utils/sites-query')(name)
-  describe(name, () => {
-    it('should parse index.php', () => {
+  describe(name, function () {
+    it('should parse index.php', function () {
       const result = pageParser(query.index, `https://${name}/index.php`)
       result.should.have.property('userId').that.is.a('number')
     })
-    it('should parse userdetails.php with seeding torrents', () => {
+    it('should parse userdetails.php with seeding torrents', function () {
       const result = pageParser(query.user, `https://${name}/userdetails.php`)
       result.should.have.property('userName').that.is.a('string')
       result.should.have.property('userClass').that.is.a('string')
@@ -27,7 +27,7 @@ nameList.forEach(name => {
         result.seedingTorrents[0].should.have.property('size').that.is.a('number')
       }
     })
-    it('should parse torrents.php', () => {
+    it('should parse torrents.php', function () {
       const result = pageParser(query.torrent, `https://${name}/torrents.php`)
       result.should.be.an('array')
       if (result.length > 0) {

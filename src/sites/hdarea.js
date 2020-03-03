@@ -9,16 +9,16 @@ hdarea._parseStatus = (query, index) => {
   let status = ''
   let progress = 0
   switch (true) {
-    case statusQuery.find('table[title="downloading"]').length == 1:
+    case statusQuery.find('table[title="downloading"]').length === 1:
       status = 'Leeching'
       break
-    case statusQuery.find('table[title="seeding"]').length == 1:
+    case statusQuery.find('table[title="seeding"]').length === 1:
       status = 'Seeding'
       break
-    case statusQuery.find('table[title="Stopped"]').length == 1:
+    case statusQuery.find('table[title="Stopped"]').length === 1:
       status = 'Stopped'
       break
-    case statusQuery.find('table[title="completed"]').length == 1:
+    case statusQuery.find('table[title="completed"]').length === 1:
       status = 'Snatched'
       break
     default:
@@ -26,7 +26,7 @@ hdarea._parseStatus = (query, index) => {
   if (status) {
     progress = parseInt(statusQuery.find('img.progress').parent().attr('style').match(/width: (\d+)%/)[1])
   }
-  return { status, progress}
+  return { status, progress }
 }
 
 module.exports = hdarea

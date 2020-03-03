@@ -1,11 +1,11 @@
 const BaseSite = require('./base-site')
 
 class NexusPhpSite extends BaseSite {
-  constructor(config) {
-    super(config)
-  }
+  // constructor (config) {
+  //   super(config)
+  // }
 
-  pageParser(query, url) {
+  pageParser (query, url) {
     const path = new URL(url).pathname
     switch (path) {
       case '/index.php':
@@ -19,7 +19,7 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _indexPageParser(query) {
+  _indexPageParser (query) {
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     // const userName = userQuery.text()
     const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
@@ -28,7 +28,7 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _userPageParser(query) {
+  _userPageParser (query) {
     // parse user name
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     const userName = userQuery.text()
@@ -70,10 +70,10 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _parseSeedingTorrents(query) {
+  _parseSeedingTorrents (query) {
     // seeding torrent table is similar to torrent table of page
     // refer to this._torrentPageParser
-    if (query.find('table').length == 0) {
+    if (query.find('table').length === 0) {
       return []
     }
     const torrentList = []
@@ -91,7 +91,7 @@ class NexusPhpSite extends BaseSite {
     return torrentList
   }
 
-  _torrentPageParser(query) {
+  _torrentPageParser (query) {
     // return [] if nothing found
     if (/没有种子|沒有種子|Nothing found/.test(query('body').text())) {
       return []
@@ -118,7 +118,7 @@ class NexusPhpSite extends BaseSite {
       torrent.promotionDeadline = promotion.deadline || 0
       // parse tags other than promotion
       const tags = this._parseTags(tdList.eq(index.title))
-      if (promotion.hasOwnProperty('type')) {
+      if ({}.hasOwnProperty.call(promotion, 'type')) {
         tags.push(promotion.type)
       }
       torrent.tags = tags
@@ -147,16 +147,16 @@ class NexusPhpSite extends BaseSite {
     return torrentList
   }
 
-  _parseStatus(query, index) {
-    if (index.hasOwnProperty('status')) {
+  _parseStatus (query, index) {
+    if ({}.hasOwnProperty.call(index, 'status')) {
       const text = query.eq(index.status).text()
       const isActive = /peer-active/.test(query.eq(index.status).attr('class'))
       const progress = /-/.test(text) ? 0 : parseFloat(text)
       let status = ''
       if (isActive) {
-        status = progress == 100 ? 'Seeding' : 'Leeching'
+        status = progress === 100 ? 'Seeding' : 'Leeching'
       } else {
-        status = progress == 100 ? 'Snatched' : 'Stopped'
+        status = progress === 100 ? 'Snatched' : 'Stopped'
       }
       status = /-/.test(text) ? '' : status
       return {
@@ -171,18 +171,18 @@ class NexusPhpSite extends BaseSite {
     }
   }
 
-  _parseSubTitle(query) {
+  _parseSubTitle (query) {
     const subTitleQuery = query.find('a[href*="details.php?id="]').parent()
     return subTitleQuery.html().split('>').pop()
   }
 
-  _parseTags(query) {
+  _parseTags (query) {
     const tags = []
     if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
     return tags
   }
 
-  _parsePromotion(query) {
+  _parsePromotion (query) {
     const promotion = {}
     let type = ''
     let isFreeleech = false
@@ -220,7 +220,7 @@ class NexusPhpSite extends BaseSite {
     return promotion
   }
 
-  _parseTableHead(query) {
+  _parseTableHead (query) {
     // parse table head to get index of different columns
     const tdList = query.find('> td')
     const index = {}
@@ -238,19 +238,19 @@ class NexusPhpSite extends BaseSite {
           // case  tdList.eq(i).find('img.comments').length == 1:
           //   index.comments = i
           //   break
-        case tdList.eq(i).find('img.time').length == 1:
+        case tdList.eq(i).find('img.time').length === 1:
           index.date = i
           break
-        case tdList.eq(i).find('img.size').length == 1:
+        case tdList.eq(i).find('img.size').length === 1:
           index.size = i
           break
-        case tdList.eq(i).find('img.seeders').length == 1:
+        case tdList.eq(i).find('img.seeders').length === 1:
           index.seeds = i
           break
-        case tdList.eq(i).find('img.leechers').length == 1:
+        case tdList.eq(i).find('img.leechers').length === 1:
           index.leeches = i
           break
-        case tdList.eq(i).find('img.snatched').length == 1:
+        case tdList.eq(i).find('img.snatched').length === 1:
           index.snatched = i
           break
         default:

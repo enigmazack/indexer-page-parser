@@ -10,7 +10,7 @@ class BaseSite {
       const sizeType = sizeMatch[3]
       switch (true) {
         case /Zi?B/i.test(sizeType):
-          return  Math.round(sizeNum * Math.pow(2, 70))
+          return Math.round(sizeNum * Math.pow(2, 70))
         case /Ei?B/i.test(sizeType):
           return Math.round(sizeNum * Math.pow(2, 60))
         case /Pi?B/i.test(sizeType):
@@ -31,7 +31,7 @@ class BaseSite {
   }
 
   _booleanParser (query, selector) {
-    return query.find(selector).length ? true : false
+    return !!query.find(selector).length
   }
 
   // _queryAny(query, selectorList) {

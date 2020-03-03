@@ -8,11 +8,11 @@ const getQueries = (name) => {
   const seedingHtml = fs.readFileSync(path.join(__dirname, `../../pages/${name}/seeding.html`))
   const torrentHtml = fs.readFileSync(path.join(__dirname, `../../pages/${name}/torrent.html`))
 
-  const indexDom = new JSDOM(indexHtml, {contentType: 'text/html; charset=utf-8'})
-  const userDom = new JSDOM(userHtml, {contentType: 'text/html; charset=utf-8'})
-  const torrentDom = new JSDOM(torrentHtml, {contentType: 'text/html; charset=utf-8'})
+  const indexDom = new JSDOM(indexHtml, { contentType: 'text/html; charset=utf-8' })
+  const userDom = new JSDOM(userHtml, { contentType: 'text/html; charset=utf-8' })
+  const torrentDom = new JSDOM(torrentHtml, { contentType: 'text/html; charset=utf-8' })
 
-  if (userDom.window.document.getElementById('ka1').innerHTML == "") {
+  if (userDom.window.document.getElementById('ka1').innerHTML === '') {
     userDom.window.document.getElementById('ka1').innerHTML = seedingHtml
   }
 
@@ -20,7 +20,7 @@ const getQueries = (name) => {
   query.index = require('jquery')(indexDom.window)
   query.user = require('jquery')(userDom.window)
   query.torrent = require('jquery')(torrentDom.window)
-  
+
   return query
 }
 
