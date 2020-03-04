@@ -2,6 +2,7 @@ const hddolby = require('./sites/hddolby')
 const hdarea = require('./sites/hdarea')
 const ourbits = require('./sites/ourbits')
 const springsunday = require('./sites/springsunday')
+const hdchina = require('./sites/hdchina')
 
 const pageParser = (query, url) => {
   const site = new URL(url).hostname
@@ -14,6 +15,8 @@ const pageParser = (query, url) => {
       return ourbits.pageParser(query, url)
     case 'springsunday.net':
       return springsunday.pageParser(query, url)
+    case 'hdchina.org':
+      return hdchina.pageParser(query, url)
     default:
       return {}
   }

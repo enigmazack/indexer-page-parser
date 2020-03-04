@@ -8,8 +8,8 @@ const should = require('chai').should()
 const pageParser = require('../src/index')
 
 nameList.forEach(name => {
-  const query = require('./utils/sites-query')(name)
-  describe(name, function () {
+  const query = require('./utils/sites-query-cheerio')(name)
+  describe(`${name} - cheerio`, function () {
     it('should parse index.php', function () {
       const result = pageParser(query.index, `https://${name}/index.php`)
       result.should.have.property('userId').that.is.a('number')

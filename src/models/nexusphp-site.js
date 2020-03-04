@@ -108,7 +108,7 @@ class NexusPhpSite extends BaseSite {
       return []
     }
     const torrentList = []
-    const table = query('table.torrents:last')
+    const table = query('table[class*="torrent"]').last()
     const trList = table.find('> tbody > tr')
     const index = this._parseTableHead(trList.eq(0))
     for (let i = 1; i < trList.length; i++) {
@@ -177,7 +177,7 @@ class NexusPhpSite extends BaseSite {
 
   _parseTags (query) {
     const tags = []
-    if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
+    if (query.find('img[alt*="Stick"]').length) tags.push('Sticky')
     return tags
   }
 
@@ -221,7 +221,7 @@ class NexusPhpSite extends BaseSite {
 
   _parseTableHead (query) {
     // parse table head to get index of different columns
-    const tdList = query.find('> td')
+    const tdList = query.find('> td, > th')
     const index = {}
     for (let i = 0; i < tdList.length; i++) {
       switch (true) {

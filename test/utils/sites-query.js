@@ -6,6 +6,7 @@ const getQueries = (name) => {
     case 'www.hdarea.co':
     case 'ourbits.club':
     case 'springsunday.net':
+    case 'hdchina.org':
       return getNexusphpQueries(name)
     default:
       return {}
