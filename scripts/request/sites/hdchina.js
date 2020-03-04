@@ -1,6 +1,6 @@
 const requester = require('../requester')
 const singlePageHandle = require('../single-page-handle')
-const _ = require('lodash')
+// const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
 const { JSDOM } = require('jsdom')
@@ -12,47 +12,108 @@ const request = (site, name, proxy) => {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath)
   }
-  _.forEach({
-    index: site.pages.index,
-    torrent: site.pages.torrent
-  }, (page, key) => {
-    singlePageHandle(name, page, key, request, dirPath)
-  })
-  // request user page with seeding data
-  const filePath = path.join(dirPath, 'user.html')
-  const userId = site.pages.user.match(/id=(\d+)/)[1]
-  if (fs.existsSync(filePath)) {
+  // _.forEach({
+  //   index: site.pages.index,
+  //   torrent: site.pages.torrent
+  // }, (page, key) => {
+  //   singlePageHandle(name, page, key, request, dirPath)
+  // })
+  singlePageHandle(name, site.pages.index, 'index', request, dirPath)
+
+  // request torrent page with promotion data
+  const torrentFilePath = path.join(dirPath, 'torrent.html')
+  if (fs.existsSync(torrentFilePath)) {
     console.log(`${name}/user: skip`)
   } else {
-    request(site.pages.user).then(res => {
-      if (res.status === 200) {
-        const userDom = new JSDOM(res.data, { contentType: 'text/html; charset=utf-8' })
-        const csrf = userDom.window.document.querySelector('meta[name="x-csrf"]').getAttribute('content')
-        const requestBody = {
-          userid: userId,
-          type: 'seeding',
-          csrf
-        }
-        request.post('ajax_getusertorrentlist.php',
-          // `userid=${userId}&type=seeding&csrf=${csrf}`
-          qs.stringify(requestBody)
-        ).then(seedingRes => {
-          if (seedingRes.status === 200) {
-            userDom.window.document.getElementById('ka1').innerHTML = seedingRes.data.message
-            fs.writeFileSync(filePath, userDom.serialize())
-            console.log(`${name}/user: added (with seeding data)`)
-          } else {
-            console.log(`${name}/seeding: response code ${seedingRes.status}`)
+    request(site.pages.torrent)
+      .then(res => {
+        if (res.status === 200) {
+          const torrentDom = new JSDOM(res.data, {
+            contentType: 'text/html; charset=utf-8'
+          })
+          const window = torrentDom.window
+          const document = window.document
+          const csrf = document
+            .querySelector('meta[name="x-csrf"]')
+            .getAttribute('content')
+          const $ = require('jquery')(window)
+          const torrents = $('span.sp_state_placeholder')
+            .map(function () {
+              return this.id
+            })
+            .toArray()
+          const requestBody = {
+            'ids[]': torrents,
+            csrf
           }
-        }).catch(seedingErr => {
-          console.log(`${name}/seeding: ${seedingErr}`)
-        })
-      } else {
-        console.log(`${name}/user: response code ${res.status}`)
-      }
-    }).catch(err => {
-      console.log(`${name}/user: ${err}`)
-    })
+          request
+            .post('ajax_promotion.php', qs.stringify(requestBody))
+            .then(promotionRes => {
+              if (promotionRes.status === 200) {
+                for (const [key, value] of Object.entries(promotionRes.data.message)) {
+                  $(`span#${key}.sp_state_placeholder`)
+                    .replaceWith('<p>' + value.sp_state + '</p>' + value.timeout)
+                }
+                fs.writeFileSync(torrentFilePath, torrentDom.serialize())
+                console.log(`${name}/torrent: added (with promotion data)`)
+              } else {
+                console.log(`${name}/promotion: response code ${promotionRes.status}`)
+              }
+            })
+            .catch(promotionErr => {
+              console.log(`${name}/promotion: ${promotionErr}`)
+            })
+        } else {
+          console.log(`${name}/torrent: response code ${res.status}`)
+        }
+      })
+      .catch(err => {
+        console.log(`${name}/torrent: ${err}`)
+      })
+  }
+
+  // request user page with seeding data
+  const userFilePath = path.join(dirPath, 'user.html')
+  const userId = site.pages.user.match(/id=(\d+)/)[1]
+  if (fs.existsSync(userFilePath)) {
+    console.log(`${name}/user: skip`)
+  } else {
+    request(site.pages.user)
+      .then(res => {
+        if (res.status === 200) {
+          const userDom = new JSDOM(res.data, {
+            contentType: 'text/html; charset=utf-8'
+          })
+          const document = userDom.window.document
+          const csrf = document
+            .querySelector('meta[name="x-csrf"]')
+            .getAttribute('content')
+          const requestBody = {
+            userid: userId,
+            type: 'seeding',
+            csrf
+          }
+          request
+            .post('ajax_getusertorrentlist.php', qs.stringify(requestBody))
+            .then(seedingRes => {
+              if (seedingRes.status === 200) {
+                document.getElementById('ka1').innerHTML = seedingRes.data.message
+                fs.writeFileSync(userFilePath, userDom.serialize())
+                console.log(`${name}/user: added (with seeding data)`)
+              } else {
+                console.log(`${name}/seeding: response code ${seedingRes.status}`)
+              }
+            })
+            .catch(seedingErr => {
+              console.log(`${name}/seeding: ${seedingErr}`)
+            })
+        } else {
+          console.log(`${name}/user: response code ${res.status}`)
+        }
+      })
+      .catch(err => {
+        console.log(`${name}/user: ${err}`)
+      })
   }
 }
 
@@ -78,3 +139,22 @@ module.exports = request
 //   }
 //   return '';
 // }
+
+// const torrents = jQuery('span.sp_state_placeholder').map(function () {
+//   return this.id
+// }).toArray()
+
+// jQuery.post('ajax_promotion.php', {
+//   ids: torrents,
+//   csrf: get_csrf()
+// },
+// function (response) {
+//   if (response.status === 200) {
+//     for (const [key, value] of Object.entries(response.message)) {
+//       jQuery('span#' + key + '.sp_state_placeholder').replaceWith('<p>' + value.sp_state + '</p>' + value.timeout)
+//     }
+
+//     console.log('优惠状态更新完毕')
+//   }
+// }
+// )
