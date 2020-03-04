@@ -12,12 +12,7 @@ const request = (site, name, proxy) => {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath)
   }
-  // _.forEach({
-  //   index: site.pages.index,
-  //   torrent: site.pages.torrent
-  // }, (page, key) => {
-  //   singlePageHandle(name, page, key, request, dirPath)
-  // })
+  // request index
   singlePageHandle(name, site.pages.index, 'index', request, dirPath)
 
   // request torrent page with promotion data
@@ -119,6 +114,7 @@ const request = (site, name, proxy) => {
 
 module.exports = request
 
+// code from the website
 // function getusertorrentlistajax(userid, type, blockid) {
 //   if (document.getElementById(blockid).innerHTML === "") {
 //     jQuery.post('ajax_getusertorrentlist.php', {
@@ -153,8 +149,5 @@ module.exports = request
 //     for (const [key, value] of Object.entries(response.message)) {
 //       jQuery('span#' + key + '.sp_state_placeholder').replaceWith('<p>' + value.sp_state + '</p>' + value.timeout)
 //     }
-
-//     console.log('优惠状态更新完毕')
 //   }
-// }
-// )
+// })
