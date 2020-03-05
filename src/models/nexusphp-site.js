@@ -82,15 +82,12 @@ class NexusPhpSite extends BaseSite {
   }
 
   _parseSeedingTorrents (query) {
-    // seeding torrent table is similar to torrent table of page
-    // refer to this._torrentPageParser
     if (query.find('table').length === 0) {
       return []
     }
     const torrentList = []
     const table = query.find('table')
     const trList = table.find('> tbody > tr')
-    // const index = this._parseTableHead(trList.eq(0))
     const index = { title: 1, size: 2 }
     for (let i = 1; i < trList.length; i++) {
       const torrent = {}
@@ -111,7 +108,6 @@ class NexusPhpSite extends BaseSite {
     const torrentList = []
     const table = query('table.torrents, table.torrent_list').last()
     const trList = table.find('> tbody > tr')
-    // const index = this._parseTableHead(trList.eq(0))
     const tdLength = trList.eq(1).find('> td').length
     const index = this._getTorrentTableIndex(tdLength)
     for (let i = 1; i < trList.length; i++) {
@@ -240,45 +236,6 @@ class NexusPhpSite extends BaseSite {
     }
     return promotion
   }
-
-  // _parseTableHead (query) {
-  //   // parse table head to get index of different columns
-  //   const tdList = query.find('> td, > th')
-  //   const index = {}
-  //   for (let i = 0; i < tdList.length; i++) {
-  //     switch (true) {
-  //       case /(类型|類型|Type)/.test(tdList.eq(i).text()):
-  //         index.category = i
-  //         break
-  //       case /(标题|標題|Name)/.test(tdList.eq(i).text()):
-  //         index.title = i
-  //         break
-  //       case /(进度|進度|DL%)/.test(tdList.eq(i).text()):
-  //         index.status = i
-  //         break
-  //         // case  tdList.eq(i).find('img.comments').length == 1:
-  //         //   index.comments = i
-  //         //   break
-  //       case tdList.eq(i).find('img.time').length === 1:
-  //         index.date = i
-  //         break
-  //       case tdList.eq(i).find('img.size').length === 1:
-  //         index.size = i
-  //         break
-  //       case tdList.eq(i).find('img.seeders').length === 1:
-  //         index.seeds = i
-  //         break
-  //       case tdList.eq(i).find('img.leechers').length === 1:
-  //         index.leeches = i
-  //         break
-  //       case tdList.eq(i).find('img.snatched').length === 1:
-  //         index.snatched = i
-  //         break
-  //       default:
-  //     }
-  //   }
-  //   return index
-  // }
 }
 
 module.exports = NexusPhpSite
