@@ -39,7 +39,7 @@ const request = (site, name, proxy) => {
         const userDom = new JSDOM(userRes.data, { contentType: 'text/html; charset=utf-8' })
         const $ = require('jquery')(userDom.window)
         $('#TdTemp').replaceWith(viewRes.data)
-        $('#ka1').replaceWith(seedingRes.data)
+        $('#ka1').html(seedingRes.data)
         fs.writeFileSync(filePath, userDom.serialize())
         console.log(`${name}/user: added (with seeding data)`)
       } else {

@@ -4,6 +4,7 @@ const ourbits = require('./sites/ourbits')
 const springsunday = require('./sites/springsunday')
 const hdchina = require('./sites/hdchina')
 const mteam = require('./sites/m-team')
+const ptSJTU = require('./sites/pt-sjtu-edu')
 
 const pageParser = (query, url) => {
   const site = new URL(url).hostname
@@ -20,6 +21,8 @@ const pageParser = (query, url) => {
       return hdchina.pageParser(query, url)
     case 'pt.m-team.cc':
       return mteam.pageParser(query, url)
+    case 'pt.sjtu.edu.cn':
+      return ptSJTU.pageParser(query, url)
     default:
       return 'Unknow site'
   }
