@@ -1,6 +1,6 @@
 // This script requst the pages and write to file
-const sites = require('../pages/request-config.json').sites
-const proxy = require('../pages/request-config.json').proxy
+const sites = require('./request-config.json').sites
+const proxy = require('./request-config.json').proxy
 const nexusphpRequest = require('./request/nexusphp')
 const pagesRequest = require('./request/pages')
 const individualRequest = require('./request/individual')
