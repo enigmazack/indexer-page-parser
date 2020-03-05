@@ -5,15 +5,11 @@ const mteam = new NexusPhpSite({
 })
 
 mteam._seedingPageParser = function (query) {
-  let pagesCount = 0
+  // -1 bug
+  const countString = query('script').text().match(/maxpage=(-?\d+)/)[1]
+  const pagesCount = countString === '18446744073709551615' ? 0 : parseInt(countString) + 1
   const seedingTorrents = []
-  if (query('table.main').length === 1) return { pagesCount, seedingTorrents }
-  const mainTable = query('table.main').eq(1)
-  const countQuery = mainTable.find('> tbody > tr > td > p').first()
-  pagesCount = countQuery.find('a[href*="&page="]').length
-    ? parseInt(countQuery.find('a[href*="&page="]').last().attr('href').match(/page=(\d+)/)[1]) + 1
-    : 1
-  const seedingTable = mainTable.find('> tbody > tr > td > table')
+  const seedingTable = query('#outer > table > tbody > tr > td > table')
   const trList = seedingTable.find('> tbody > tr')
   for (let i = 1; i < trList.length; i++) {
     const torrent = {}
