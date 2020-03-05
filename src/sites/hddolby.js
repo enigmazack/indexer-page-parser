@@ -4,7 +4,7 @@ const hddolby = new NexusPhpSite({
   name: 'www.hddolby.com'
 })
 
-hddolby._parseTags = (query) => {
+hddolby._parseTags = function (query) {
   const tags = []
   if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
   if (query.find('font.classic').length) tags.push('Official')

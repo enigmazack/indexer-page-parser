@@ -4,7 +4,7 @@ const hdarea = new NexusPhpSite({
   name: 'www.hdarea.co'
 })
 
-hdarea._parseStatus = (query, index) => {
+hdarea._parseStatus = function (query, index) {
   const statusQuery = query.eq(index.title)
   let isActive = false
   let progress = 0

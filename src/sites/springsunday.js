@@ -4,19 +4,19 @@ const springsunday = new NexusPhpSite({
   name: 'springsunday.net'
 })
 
-springsunday._parseTags = (query) => {
+springsunday._parseTags = function (query) {
   const tags = []
   if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
   if (query.find('span.exclusive').length) tags.push('Exclusive')
   return tags
 }
 
-springsunday._parseBonus = (query) => {
+springsunday._parseBonus = function (query) {
   const bonusString = query.text().match(/(魔力值|Points).+?([\d,.]+)/)[2]
-  return springsunday._parseNumber(bonusString)
+  return this._parseNumber(bonusString)
 }
 
-springsunday._parseStatus = (query, index) => {
+springsunday._parseStatus = function (query, index) {
   const statusQuery = query.eq(index.title)
   const progressBarQuery = statusQuery.find('div.progress_bar')
   const subscriptionQuery = statusQuery.find('a[id*="subscription"] > img')

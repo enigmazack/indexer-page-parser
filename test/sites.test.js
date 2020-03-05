@@ -3,11 +3,12 @@ const nameList = [
   'www.hdarea.co',
   'ourbits.club',
   'springsunday.net',
-  'hdchina.org'
+  'hdchina.org',
+  'pt.m-team.cc'
 ]
 const should = require('chai').should()
 const pageParser = require('../src/index')
-const sitesQuery = require('../scripts/utils/sites-query')
+const sitesQuery = require('../scripts/utils/get-queries')
 
 nameList.forEach(name => {
   const query = sitesQuery(name)
@@ -50,5 +51,16 @@ nameList.forEach(name => {
         result[0].should.have.property('progress').that.is.a('number')
       }
     })
+    if (name === 'pt.m-team.cc') {
+      it('should parse getusertorrentlist.php', function () {
+        const result = pageParser(query.seeding, `https://${name}/getusertorrentlist.php`)
+        result.should.have.property('pagesCount').that.is.a('number')
+        result.should.have.property('seedingTorrents').that.is.an('array')
+        if (result.seedingTorrents.length > 0) {
+          result.seedingTorrents[0].should.have.property('id').that.is.a('number')
+          result.seedingTorrents[0].should.have.property('size').that.is.a('number')
+        }
+      })
+    }
   })
 })
