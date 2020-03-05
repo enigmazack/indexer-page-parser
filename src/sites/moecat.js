@@ -4,15 +4,9 @@ const moecat = new NexusPhpSite({
   name: 'moecat.bast'
 })
 
-moecat._indexPageParser = function (query) {
-  // parse user id
-  const userQuery = query('a[href*="userdetails.php?id="]').first()
-  const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
-  // TODO: parse unread message
-  return {
-    userId,
-    unreadMessage: 0
-  }
+moecat._parseMessage = function () {
+  // TODO
+  return 0
 }
 
 moecat.pageParser = function (query, url) {

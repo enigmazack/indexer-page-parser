@@ -19,11 +19,11 @@ nameList.forEach(name => {
     it('should parse index.php', function () {
       const result = pageParser(query.index, `https://${name}/index.php`)
       result.should.have.property('userId').that.is.a('number')
+      result.should.have.property('userName').that.is.a('string')
       result.should.have.property('unreadMessage').that.is.a('number')
     })
     it('should parse userdetails.php with seeding torrents', function () {
       const result = pageParser(query.user, `https://${name}/userdetails.php`)
-      result.should.have.property('userName').that.is.a('string')
       result.should.have.property('userClass').that.is.a('string')
       result.should.have.property('uploadTraffic').that.is.a('number')
       result.should.have.property('downloadTraffic').that.is.a('number')

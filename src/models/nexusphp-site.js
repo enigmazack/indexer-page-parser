@@ -23,19 +23,25 @@ class NexusPhpSite extends BaseSite {
     // parse user id
     const userQuery = query('a[href*="userdetails.php?id="]').first()
     const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
+    const userName = userQuery.text()
     // parse unread message
-    const messageQuery = query('a[href*="messages.php"]').first().parent()
-    const unreadMessage = parseInt(messageQuery.text().match(/\((\d+).+(新|New)\)/)[1])
+    const unreadMessage = this._parseMessage(query)
     return {
       userId,
+      userName,
       unreadMessage
     }
   }
 
+  _parseMessage (query) {
+    const messageQuery = query('a[href*="messages.php"]').first().parent()
+    return parseInt(messageQuery.text().match(/\((\d+).+(新|New)\)/)[1])
+  }
+
   _userPageParser (query) {
     // parse user name
-    const userQuery = query('a[href*="userdetails.php?id="]').first()
-    const userName = userQuery.text()
+    // const userQuery = query('a[href*="userdetails.php?id="]').first()
+    // const userName = userQuery.text()
     // parse user class
     const classQuery = query(
       'td.rowhead:contains("等级"), td.rowhead:contains("等級"), td.rowhead:contains("Class")'
@@ -67,7 +73,7 @@ class NexusPhpSite extends BaseSite {
     const seedingTorrentsQuery = query('#ka1')
     const seedingTorrents = this._parseSeedingTorrents(seedingTorrentsQuery)
     return {
-      userName,
+      // userName,
       userClass,
       uploadTraffic,
       downloadTraffic,
