@@ -5,6 +5,7 @@ const springsunday = require('./sites/springsunday')
 const hdchina = require('./sites/hdchina')
 const mteam = require('./sites/m-team')
 const ptSJTU = require('./sites/pt-sjtu-edu')
+const leaguehd = require('./sites/leaguehd')
 
 const pageParser = (query, url) => {
   const site = new URL(url).hostname
@@ -23,6 +24,8 @@ const pageParser = (query, url) => {
       return mteam.pageParser(query, url)
     case 'pt.sjtu.edu.cn':
       return ptSJTU.pageParser(query, url)
+    case 'leaguehd.com':
+      return leaguehd.pageParser(query, url)
     default:
       return 'Unknow site'
   }

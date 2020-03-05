@@ -5,7 +5,8 @@ const nameList = [
   'springsunday.net',
   'hdchina.org',
   'pt.m-team.cc',
-  'pt.sjtu.edu.cn'
+  'pt.sjtu.edu.cn',
+  'leaguehd.com'
 ]
 const should = require('chai').should()
 const pageParser = require('../src/index')
