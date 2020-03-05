@@ -27,6 +27,15 @@ mteam._seedingPageParser = function (query) {
   return { pagesCount, seedingTorrents }
 }
 
+mteam._parseTags = function (query) {
+  const tags = []
+  if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
+  if (query.find('img.label_diy').length) tags.push('DIY')
+  if (query.find('img.label_dub').length) tags.push('ChineseAudio')
+  if (query.find('img.label_sub').length) tags.push('ChineseSubtitles')
+  return tags
+}
+
 mteam.pageParser = function (query, url) {
   const path = new URL(url).pathname
   switch (path) {
