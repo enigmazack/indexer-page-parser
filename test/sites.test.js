@@ -2,13 +2,15 @@ const nameList = [
   'www.hddolby.com',
   'www.hdarea.co',
   'ourbits.club',
-  'springsunday.net'
+  'springsunday.net',
+  'hdchina.org'
 ]
 const should = require('chai').should()
 const pageParser = require('../src/index')
+const sitesQuery = require('../scripts/utils/sites-query')
 
 nameList.forEach(name => {
-  const query = require('./utils/sites-query')(name)
+  const query = sitesQuery(name)
   describe(name, function () {
     it('should parse index.php', function () {
       const result = pageParser(query.index, `https://${name}/index.php`)
