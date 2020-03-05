@@ -66,7 +66,7 @@ moecat._torrentPageParser = function (query) {
     // parse title and id
     const titleQuery = evenTdList.eq(1).find('a[href*="details.php?id="]')
     torrent.title = titleQuery.attr('title')
-    torrent.id = titleQuery.attr('href').match(/id=(\d+)/)[1]
+    torrent.id = parseInt(titleQuery.attr('href').match(/id=(\d+)/)[1])
     // parse subTitle
     torrent.subTitle = this._parseSubTitle(evenTdList.eq(1))
     // parse promotion status

@@ -119,7 +119,7 @@ class NexusPhpSite extends BaseSite {
       // parse title and id
       const titleQuery = tdList.eq(index.title).find('a[href*="details.php?id="]')
       torrent.title = titleQuery.attr('title')
-      torrent.id = titleQuery.attr('href').match(/id=(\d+)/)[1]
+      torrent.id = parseInt(titleQuery.attr('href').match(/id=(\d+)/)[1])
       // parse subTitle
       torrent.subTitle = this._parseSubTitle(tdList.eq(index.title))
       // parse promotion status

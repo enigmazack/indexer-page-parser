@@ -6,7 +6,8 @@ const nameList = [
   'hdchina.org',
   'pt.m-team.cc',
   'pt.sjtu.edu.cn',
-  'leaguehd.com'
+  'leaguehd.com',
+  'moecat.best'
 ]
 const should = require('chai').should()
 const pageParser = require('../src/index')
@@ -39,6 +40,7 @@ nameList.forEach(name => {
       result.should.be.an('array')
       if (result.length > 0) {
         result[0].should.have.property('category').that.is.a('number')
+        result[0].should.have.property('id').that.is.a('number')
         result[0].should.have.property('title').that.is.a('string')
         result[0].should.have.property('subTitle').that.is.a('string')
         result[0].should.have.property('isFreeleech').that.is.oneOf([true, false])
