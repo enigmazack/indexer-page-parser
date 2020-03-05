@@ -3,6 +3,7 @@ const hdarea = require('./sites/hdarea')
 const ourbits = require('./sites/ourbits')
 const springsunday = require('./sites/springsunday')
 const hdchina = require('./sites/hdchina')
+const mteam = require('./sites/m-team')
 
 const pageParser = (query, url) => {
   const site = new URL(url).hostname
@@ -17,8 +18,10 @@ const pageParser = (query, url) => {
       return springsunday.pageParser(query, url)
     case 'hdchina.org':
       return hdchina.pageParser(query, url)
+    case 'pt.m-team.cc':
+      return mteam.pageParser(query, url)
     default:
-      return {}
+      return 'Unknow site'
   }
 }
 

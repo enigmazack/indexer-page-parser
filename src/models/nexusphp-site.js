@@ -108,7 +108,7 @@ class NexusPhpSite extends BaseSite {
       return []
     }
     const torrentList = []
-    const table = query('table[class*="torrent"]').last()
+    const table = query('table.torrents, table.torrent_list').last()
     const trList = table.find('> tbody > tr')
     const index = this._parseTableHead(trList.eq(0))
     for (let i = 1; i < trList.length; i++) {
@@ -171,7 +171,7 @@ class NexusPhpSite extends BaseSite {
   }
 
   _parseSubTitle (query) {
-    const subTitleQuery = query.find('a[href*="details.php?id="]').parent()
+    const subTitleQuery = query.find('a[href*="details.php?id="]').last().parent()
     return subTitleQuery.html().split('>').pop()
   }
 
