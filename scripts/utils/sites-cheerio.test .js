@@ -5,10 +5,10 @@ const nameList = [
   'springsunday.net'
 ]
 const should = require('chai').should()
-const pageParser = require('../src/index')
+const pageParser = require('../../src/index')
 
 nameList.forEach(name => {
-  const query = require('./utils/sites-query-cheerio')(name)
+  const query = require('./sites-query-cheerio')(name)
   describe(`${name} - cheerio`, function () {
     it('should parse index.php', function () {
       const result = pageParser(query.index, `https://${name}/index.php`)

@@ -1,5 +1,5 @@
-const requester = require('../requester')
-const singlePageHandle = require('../single-page-handle')
+const requester = require('./requester')
+const singlePageHandle = require('./single-page-handle')
 // const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
@@ -8,7 +8,7 @@ const qs = require('querystring')
 
 const request = (site, name, proxy) => {
   const request = requester(site, proxy)
-  const dirPath = path.join(__dirname, `../../../pages/${name}`)
+  const dirPath = path.join(__dirname, `../../pages/${name}`)
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath)
   }

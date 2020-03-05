@@ -1,4 +1,4 @@
-const hdchinaRequest = require('./sites/hdchina')
+const hdchinaRequest = require('./hdchina')
 
 const requestIndividual = (site, name, proxy) => {
   switch (name) {
