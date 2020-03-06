@@ -32,18 +32,47 @@ describe('class BaseSite', function () {
       const parserList = [
         {
           name: 'name',
-          key: '姓名',
+          keywords: '姓名',
           parseFunction: (q) => { return q.text() }
         },
         {
           name: 'age',
-          key: ['年龄', 'Age'],
+          keywords: ['年龄', 'Age'],
           parseFunction: (q) => { return parseInt(q.text()) }
         }
       ]
       const result = testSite._parsePairwiseTable($('table'), selector, parserList)
       result.should.have.property('name').that.eq('Zack')
       result.should.have.property('age').that.eq(18)
+    })
+  })
+  describe('the _parseChartTable method', function () {
+    it('should parse chart well', function () {
+      const $ = cheerio.load(
+        '<table><tbody><tr><td>姓名</td><td>年龄</td><td>性别</td></tr><tr><td>Zack</td><td>18</td><td>male</td></tr><tr><td>Yang</td><td>17</td><td>female</td></tr></tbody></table>'
+      )
+      const parserList = [
+        {
+          name: 'name',
+          index: 0,
+          parseFunction: q => q.text()
+        },
+        {
+          name: 'age',
+          index: 1,
+          parseFunction: q => parseInt(q.text())
+        },
+        {
+          name: 'gender',
+          index: 2,
+          parseFunction: q => q.text()
+        }
+      ]
+      const result = testSite._parseChartTable($('table'), parserList)
+      result.should.be.an('array').that.is.with.lengthOf(2)
+      result[0].should.have.property('name').that.eq('Zack')
+      result[0].should.have.property('age').that.eq(18)
+      result[1].should.have.property('gender').that.eq('female')
     })
   })
 })
