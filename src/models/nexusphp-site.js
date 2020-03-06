@@ -39,9 +39,6 @@ class NexusPhpSite extends BaseSite {
   }
 
   _userPageParser (query) {
-    // parse user name
-    // const userQuery = query('a[href*="userdetails.php?id="]').first()
-    // const userName = userQuery.text()
     // parse user class
     const classQuery = query(
       'td.rowhead:contains("等级"), td.rowhead:contains("等級"), td.rowhead:contains("Class")'
@@ -210,24 +207,24 @@ class NexusPhpSite extends BaseSite {
     let type = ''
     let isFreeleech = false
     switch (true) {
-      case this._booleanParser(query, 'img.pro_free'):
+      case !!query.find('img.pro_free').length:
         type = 'Free'
         isFreeleech = true
         break
-      case this._booleanParser(query, 'img.pro_free2up'):
+      case !!query.find('img.pro_free2up').length:
         type = '2xFree'
         isFreeleech = true
         break
-      case this._booleanParser(query, 'img.pro_2up'):
+      case !!query.find('img.pro_2up').length:
         type = '2xUp'
         break
-      case this._booleanParser(query, 'img.pro_50pctdown2up'):
+      case !!query.find('img.pro_50pctdown2up').length:
         type = '2x50%'
         break
-      case this._booleanParser(query, 'img.pro_30pctdown'):
+      case !!query.find('img.pro_30pctdown').length:
         type = '30%'
         break
-      case this._booleanParser(query, 'img.pro_50pctdown'):
+      case !!query.find('img.pro_50pctdown').length:
         type = '50%'
         break
       default:
