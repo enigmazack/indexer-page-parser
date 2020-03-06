@@ -24,7 +24,7 @@ class BaseSite {
       const sizeType = sizeMatch[3]
       switch (true) {
         // note that Number.MAX_SAFE_INTEGER is (1n << 53n) - 1n
-        // so size >= 8 PB will parse into an approximate value
+        // so size >= 8 PB will be parsed into an approximate value
         // however, it is acceptable for our application
         case /Zi?B/i.test(sizeType):
           return Math.round(sizeNum * Math.pow(2, 70))
