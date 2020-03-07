@@ -4,7 +4,18 @@ const springsunday = new NexusPhpSite({
   name: 'springsunday.net'
 })
 
-springsunday._parseTags = function (query) {
+springsunday.torrentTableIndex = {
+  category: 0,
+  title: 1,
+  date: 4,
+  size: 5,
+  seeds: 6,
+  leeches: 7,
+  snatched: 8,
+  status: 1
+}
+
+springsunday._parseTorrentTags = function (query) {
   const tags = []
   if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
   if (query.find('span.exclusive').length) tags.push('Exclusive')
@@ -16,10 +27,9 @@ springsunday._parseBonus = function (query) {
   return this._parseNumber(bonusString)
 }
 
-springsunday._parseStatus = function (query, index) {
-  const statusQuery = query.eq(index.title)
-  const progressBarQuery = statusQuery.find('div.progress_bar')
-  const subscriptionQuery = statusQuery.find('a[id*="subscription"] > img')
+springsunday._parseTorrentStatus = function (query) {
+  const progressBarQuery = query.find('div.progress_bar')
+  const subscriptionQuery = query.find('a[id*="subscription"] > img')
   let isActive = false
   let progress = 0
   if (progressBarQuery.length) {

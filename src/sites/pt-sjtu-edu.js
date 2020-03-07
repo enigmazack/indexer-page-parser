@@ -9,7 +9,7 @@ ptSJTU._parseMessage = function () {
   return 0
 }
 
-ptSJTU._parsePromotion = function (query) {
+ptSJTU._parseTorrentPromotion = function (query) {
   const promotion = {}
   let isFreeleech = false
   let type = ''
@@ -33,51 +33,16 @@ ptSJTU._parsePromotion = function (query) {
     default:
   }
   promotion.isFreeleech = isFreeleech
-  if (type) promotion.type = type
+  promotion.type = type
   const deadlineQuery = query.find('font[style="color:#38ACEC"]')
-  if (deadlineQuery.length) {
-    promotion.deadline = this._parseTime(deadlineQuery.text().split(':')[1])
-  }
+  promotion.deadline = deadlineQuery.length
+    ? this._parseTime(deadlineQuery.text().split(':')[1])
+    : 0
   return promotion
 }
 
-ptSJTU._parseTime = function (timeString) {
-  const timeMatch = timeString.match(/\d+[分时天月年]/g)
-  let length = 0
-  timeMatch.forEach(time => {
-    const timeMatch = time.match(/(\d+)([分时天月年])/)
-    const number = parseInt(timeMatch[1])
-    const unit = timeMatch[2]
-    switch (true) {
-      case unit === '分':
-        length += number
-        break
-      case unit === '时':
-        length += number * 60
-        break
-      case unit === '天':
-        length += number * 60 * 24
-        break
-      case unit === '月':
-        length += number * 60 * 24 * 30
-        break
-      case unit === '年':
-        length += number * 60 * 24 * 365
-        break
-      default:
-    }
-  })
-  return Date.now() - length * 60 * 1000
+ptSJTU._parseTorrentDate = function (query) {
+  return Date.now() - this._parseTime(query.text())
 }
-
-ptSJTU._parseDate = function (query) {
-  return this._parseTime(query.text())
-}
-
-// ptSJTU._parseTags = function (query) {
-//   const tags = []
-//   if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
-//   if (query.find('img.subicon').length) tags.push('ChineseSubtitles')
-// }
 
 module.exports = ptSJTU

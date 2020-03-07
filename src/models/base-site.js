@@ -48,6 +48,40 @@ class BaseSite {
   }
 
   /**
+   * Parse time (with units in Chinese) into ms
+   * @param {string} timeString - time string with units in Chinese
+   * @returns {number} time of ms
+   */
+  _parseTime (timeString) {
+    const timeMatch = timeString.match(/\d+[分时天月年]/g)
+    let length = 0
+    timeMatch.forEach(time => {
+      const timeMatch = time.match(/(\d+)([分时天月年])/)
+      const number = parseInt(timeMatch[1])
+      const unit = timeMatch[2]
+      switch (true) {
+        case unit === '分':
+          length += number
+          break
+        case unit === '时':
+          length += number * 60
+          break
+        case unit === '天':
+          length += number * 60 * 24
+          break
+        case unit === '月':
+          length += number * 60 * 24 * 30
+          break
+        case unit === '年':
+          length += number * 60 * 24 * 365
+          break
+        default:
+      }
+    })
+    return length * 60 * 1000
+  }
+
+  /**
    * A query helper, expect to return the first non-empty result of the selectors
    * @param {JQuery} query - jQuery object
    * @param {string[]} selectorList - list of selectors

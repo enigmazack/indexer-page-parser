@@ -4,7 +4,7 @@ const ourbits = new NexusPhpSite({
   name: 'ourbits.club'
 })
 
-ourbits._parseTags = function (query) {
+ourbits._parseTorrentTags = function (query) {
   const tags = []
   if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
   if (query.find('div.tag-gf').length) tags.push('Internal')
@@ -16,14 +16,10 @@ ourbits._parseTags = function (query) {
   return tags
 }
 
-ourbits._parseStatus = function (query, index) {
-  const isActive = !!query.eq(index.title).find('div.doing').length
-  const text = query.eq(index.status).text()
-  const progress = /-/.test(text) ? 0 : parseFloat(text)
-  return {
-    isActive,
-    progress
-  }
+ourbits._parseTorrentStatus = function (query) {
+  const isActive = !!query.find('div.doing').length
+  const progress = /-/.test(query.text()) ? 0 : parseFloat(query.text())
+  return { isActive, progress }
 }
 
 module.exports = ourbits
