@@ -4,22 +4,26 @@ const moecat = new NexusPhpSite({
   name: 'moecat.bast'
 })
 
+/**
+ * @todo Implement this function.
+ */
 moecat._parseMessage = function () {
   // TODO
   return 0
 }
 
-moecat.pageParser = function (query, url) {
+moecat.pageParser = function ($, url) {
   const path = new URL(url).pathname
   switch (path) {
     case '/index.php':
-      return this._indexPageParser(query)
+      return this._indexPageParser($)
     case '/torrents.php':
-      return this._torrentPageParser(query)
+    case '/torrentshd.php':
+      return this._torrentPageParser($)
     case '/userdetails.php':
-      return this._userPageParser(query)
+      return this._userPageParser($)
     case '/getusertorrentlist.php':
-      return this._seedingPageParser(query)
+      return this._seedingPageParser($)
     default:
       return {}
   }
@@ -27,19 +31,22 @@ moecat.pageParser = function (query, url) {
 
 moecat._seedingPageParser = function (query) {
   const pagesCount = parseInt(query('script').text().match(/maxpage=(-?\d+)/)[1]) + 1
-  const seedingTorrents = []
+  let seedingTorrents = []
   if (query('#outer > table').length !== 2) return { pagesCount, seedingTorrents }
   const seedingTable = query('#outer > table').eq(1)
-  const trList = seedingTable.find('> tbody > tr')
-  for (let i = 1; i < trList.length; i++) {
-    const torrent = {}
-    const tdList = trList.eq(i).find('> td')
-    const idQuery = tdList.eq(1).find('a[href*="details.php?id="]')
-    torrent.id = parseInt(idQuery.attr('href').match(/id=(\d+)/)[1])
-    const sizeQuery = tdList.eq(2)
-    torrent.size = this._parseSize(sizeQuery.text())
-    seedingTorrents.push(torrent)
-  }
+  const tdParserList = [
+    {
+      name: 'id',
+      index: 1,
+      parseFunction: p => this._parseTorrentId(p)
+    },
+    {
+      name: 'size',
+      index: 2,
+      parseFunction: p => this._parseTorrentSize(p)
+    }
+  ]
+  seedingTorrents = this._parseChartTable(seedingTable, tdParserList)
   return { pagesCount, seedingTorrents }
 }
 
@@ -55,26 +62,16 @@ moecat._torrentPageParser = function (query) {
     const evenTdList = trList.eq(i).find('> td')
     const oddTdList = trList.eq(i + 1).find('> td')
     // parse category
-    const categoryQuery = evenTdList.eq(0).find('a[href*="?cat="]')
-    torrent.category = parseInt(categoryQuery.attr('href').match(/cat=(\d+)/)[1])
+    torrent.category = this._parseTorrentCategory(evenTdList.eq(0))
     // parse title and id
-    const titleQuery = evenTdList.eq(1).find('a[href*="details.php?id="]')
-    torrent.title = titleQuery.attr('title')
-    torrent.id = parseInt(titleQuery.attr('href').match(/id=(\d+)/)[1])
+    torrent.title = this._parseTorrentTitle(evenTdList.eq(1))
+    torrent.id = this._parseTorrentId(evenTdList.eq(1))
     // parse subTitle
-    torrent.subTitle = this._parseSubTitle(evenTdList.eq(1))
-    // parse promotion status
-    const promotion = this._parsePromotion(evenTdList.eq(1))
-    torrent.isFreeleech = promotion.isFreeleech
-    torrent.promotionDeadline = promotion.deadline || 0
+    torrent.subTitle = this._parseTorrentSubtitle(evenTdList.eq(1))
     // parse tags other than promotion
-    const tags = this._parseTags(evenTdList.eq(1))
-    if ({}.hasOwnProperty.call(promotion, 'type')) {
-      tags.push(promotion.type)
-    }
-    torrent.tags = tags
+    torrent.tags = this._parseTorrentTags(evenTdList.eq(1))
     // parse date
-    torrent.date = this._parseDate(oddTdList.eq(1))
+    torrent.date = this._parseTorrentDate(oddTdList.eq(1))
     // parse size
     torrent.size = this._parseSize(oddTdList.eq(2).text())
     // parse seeds
@@ -83,8 +80,13 @@ moecat._torrentPageParser = function (query) {
     torrent.leeches = parseInt(evenTdList.eq(3).text())
     // parse snatched
     torrent.snatched = parseInt(evenTdList.eq(4).text())
-    // TODO: parse status
-    const status = this._parseStatus(trList.eq(i))
+    // parse promotion status
+    const promotion = this._parseTorrentPromotion(evenTdList.eq(1))
+    if (promotion.type) torrent.tags.push(promotion.type)
+    torrent.isFreeleech = promotion.isFreeleech
+    torrent.promotionDeadline = promotion.deadline
+    // parse status
+    const status = this._parseTorrentStatus(trList.eq(i))
     Object.assign(torrent, status)
     // push torrent info into torrentList
     torrentList.push(torrent)
@@ -92,7 +94,7 @@ moecat._torrentPageParser = function (query) {
   return torrentList
 }
 
-moecat._parseTags = function (query) {
+moecat._parseTorrentTags = function (query) {
   const tags = []
   if (query.find('img[alt*="Stick"]').length) tags.push('Sticky')
   if (query.find('span[style*="background-color:#8F77B5"]').length) tags.push('FirstRlease')
@@ -103,13 +105,10 @@ moecat._parseTags = function (query) {
   return tags
 }
 
-moecat._parseStatus = function (query) {
+moecat._parseTorrentStatus = function (query) {
   const isActive = !!query.find('td[title="做种中"], td[title="下载中"]').length
-  const progress = query.find('td[title="做种中"], td[title="已完成"]').length
-    ? 100 : 0
-  return {
-    isActive,
-    progress
-  }
+  const progress = query.find('td[title="做种中"], td[title="已完成"]').length ? 100 : 0
+  return { isActive, progress }
 }
+
 module.exports = moecat

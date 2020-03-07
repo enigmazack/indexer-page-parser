@@ -79,7 +79,7 @@ class NexusPhpSite extends BaseSite {
    * The main method, the entry of different pages parser
    * @param {JQueryStatic} $ - the jquery function
    * @param {string} url - the request url
-   * @returns {userBasic} parsed results
+   * @returns {userBasic|userDetails|torrentDetails|seedingPage} parsed results
    */
   pageParser ($, url) {
     const path = new URL(url).pathname
@@ -90,6 +90,8 @@ class NexusPhpSite extends BaseSite {
         return this._torrentPageParser($)
       case '/userdetails.php':
         return this._userPageParser($)
+      case '/getusertorrentlist.php':
+        return this._seedingPageParser($)
       default:
         return {}
     }
@@ -151,17 +153,15 @@ class NexusPhpSite extends BaseSite {
 
   /**
    * torrent page parser
-   * @param {JQuery} query
+   * @param {JQueryStatic} $
    * @returns {torrentDetails[]} list of torrent details information
    */
-  _torrentPageParser (query) {
+  _torrentPageParser ($) {
     // return [] if nothing found
-    if (/没有种子|沒有種子|Nothing found/.test(query('body').text())) {
+    if (/没有种子|沒有種子|Nothing found/.test($('body').text())) {
       return []
     }
-    const table = query('table.torrents, table.torrent_list').last()
-    // const tdLength = table.find('> tbody > tr').eq(1).find('> td').length
-    // const index = this._getTorrentTableIndex(tdLength)
+    const table = $('table.torrents, table.torrent_list').last()
     const index = this.torrentTableIndex
     const tdParserList = [
       {
@@ -237,6 +237,24 @@ class NexusPhpSite extends BaseSite {
       delete torrent.status
     })
     return torrentList
+  }
+
+  /**
+   * @typedef seedingPage
+   * @type {object}
+   * @property {number} pagesCount
+   * @property {torrentBasic[]} seedingTorrents
+   */
+
+  /**
+   * Seeding torrent page parser
+   * @param {JQueryStatic} $
+   * @returns {seedingPage} list of seeding torrents and pages count
+   */
+  _seedingPageParser () {
+    /** @type {seedingPage} */
+    const result = { pagesCount: 0, seedingTorrents: [] }
+    return result
   }
 
   /**
