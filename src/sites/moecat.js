@@ -67,7 +67,7 @@ moecat._torrentPageParser = function (query) {
     torrent.title = this._parseTorrentTitle(evenTdList.eq(1))
     torrent.id = this._parseTorrentId(evenTdList.eq(1))
     // parse subTitle
-    torrent.subTitle = this._parseTorrentSubtitle(evenTdList.eq(1))
+    torrent.subtitle = this._parseTorrentSubtitle(evenTdList.eq(1))
     // parse tags other than promotion
     torrent.tags = this._parseTorrentTags(evenTdList.eq(1))
     // parse date

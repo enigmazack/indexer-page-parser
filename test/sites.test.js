@@ -1,13 +1,13 @@
 const nameList = [
-  // 'www.hddolby.com',
-  'www.hdarea.co'
-  // 'ourbits.club',
-  // 'springsunday.net',
-  // 'hdchina.org',
-  // 'pt.m-team.cc',
-  // 'pt.sjtu.edu.cn',
-  // 'leaguehd.com',
-  // 'moecat.best'
+  'www.hddolby.com',
+  'www.hdarea.co',
+  'ourbits.club',
+  'springsunday.net',
+  'hdchina.org',
+  'pt.m-team.cc',
+  'pt.sjtu.edu.cn',
+  'leaguehd.com',
+  'moecat.best'
 ]
 const should = require('chai').should()
 const pageParser = require('../src/index')
