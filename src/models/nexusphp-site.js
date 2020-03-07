@@ -10,7 +10,8 @@ class NexusPhpSite extends BaseSite {
       size: 4,
       seeds: 5,
       leeches: 6,
-      snatched: 7
+      snatched: 7,
+      status: 1
     }
   }
 
@@ -220,7 +221,7 @@ class NexusPhpSite extends BaseSite {
       },
       {
         name: 'status',
-        index: index.title,
+        index: index.status,
         parseFunction: q => this._parseTorrentStatus(q)
       }
     ]

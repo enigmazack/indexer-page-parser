@@ -5,19 +5,11 @@ const hdarea = new NexusPhpSite({
 })
 
 hdarea._parseTorrentStatus = function (query) {
-  let isActive = false
-  let progress = 0
-  switch (true) {
-    case query.find('table[title="downloading"]').length === 1:
-    case query.find('table[title="seeding"]').length === 1:
-      isActive = true
-      break
-    default:
-  }
+  const isActive = !!query.find('table[title="downloading"], table[title="seeding"]').length
   const progressQuery = query.find('img.progress')
-  if (progressQuery.length) {
-    progress = parseInt(progressQuery.parent().attr('style').match(/width.+?(\d[\d.]*)%/)[1])
-  }
+  const progress = progressQuery.length
+    ? parseInt(progressQuery.parent().attr('style').match(/width.+?(\d[\d.]*)%/)[1])
+    : 0
   return { isActive, progress }
 }
 
