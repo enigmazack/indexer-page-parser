@@ -7,7 +7,8 @@ const siteMap = new Map([
   ['pt.m-team.cc', require('./sites/m-team')],
   ['pt.sjtu.edu.cn', require('./sites/pt-sjtu-edu')],
   ['leaguehd.com', require('./sites/leaguehd')],
-  ['moecat.best', require('./sites/moecat')]
+  ['moecat.best', require('./sites/moecat')],
+  ['totheglory.im', require('./sites/totheglory')]
 ])
 
 const pageParser = (query, url) => {

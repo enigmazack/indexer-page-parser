@@ -59,7 +59,7 @@ class NexusPhpSite extends BaseSite {
   /**
    * @typedef torrentDetails
    * @type {object}
-   * @property {number} category - category
+   * @property {number|string} category - category
    * @property {number} id - torrent id
    * @property {string} title - torrent title
    * @property {string} subtitle - torrent subtitle
@@ -126,28 +126,28 @@ class NexusPhpSite extends BaseSite {
       },
       {
         name: 'uploadTraffic',
-        keywords: ['传输', '傳送', 'Transfers'],
+        keywords: ['传输', '傳送', 'Transfers', '上传量', 'Uploaded'],
         parseFunction: q => this._parserUploadTraffic(q)
       },
       {
         name: 'downloadTraffic',
-        keywords: ['传输', '傳送', 'Transfers'],
+        keywords: ['传输', '傳送', 'Transfers', '下载量', 'Downloaded'],
         parseFunction: q => this._parserDownloadTraffic(q)
       },
       {
         name: 'bonus',
-        keywords: ['魔力', 'Karma', '积分', '積分'],
+        keywords: ['魔力', 'Karma', '积分', '積分', 'Bonus'],
         parseFunction: q => this._parseBonus(q)
       },
       {
         name: 'joinDate',
-        keywords: ['加入日期', 'join'],
+        keywords: ['加入日期', 'join', '注册日期', 'Join'],
         parseFunction: q => this._parseJoinDate(q)
       }
     ]
     const result = this._parsePairwiseTable($('body'), 'td.rowhead', parserList)
     // parse seeding torrents
-    result.seedingTorrents = this._parseSeedingTorrents($('#ka1'))
+    result.seedingTorrents = this._parseSeedingTorrents($('body'))
     return result
   }
 
@@ -158,10 +158,10 @@ class NexusPhpSite extends BaseSite {
    */
   _torrentPageParser ($) {
     // return [] if nothing found
-    if (/没有种子|沒有種子|Nothing found/.test($('body').text())) {
+    if (/没有种子|沒有種子|Nothing found|没找到任何内容|Didn't match any titles/.test($('body').text())) {
       return []
     }
-    const table = $('table.torrents, table.torrent_list').last()
+    const table = $('table.torrents, table.torrent_list, table#torrent_table').last()
     const index = this.torrentTableIndex
     const tdParserList = [
       {
@@ -186,7 +186,7 @@ class NexusPhpSite extends BaseSite {
       },
       {
         name: 'tags',
-        index: index.tags,
+        index: index.title,
         parseFunction: q => this._parseTorrentTags(q)
       },
       {
@@ -202,17 +202,17 @@ class NexusPhpSite extends BaseSite {
       {
         name: 'seeds',
         index: index.seeds,
-        parseFunction: q => parseInt(q.text())
+        parseFunction: q => this._parseTorrentSeeds(q)
       },
       {
         name: 'leeches',
         index: index.leeches,
-        parseFunction: q => parseInt(q.text())
+        parseFunction: q => this._parseTorrentLeeches(q)
       },
       {
         name: 'snatched',
         index: index.snatched,
-        parseFunction: q => parseInt(q.text())
+        parseFunction: q => this._parseTorrentSnatched(q)
       },
       {
         name: 'promotion',
@@ -255,6 +255,33 @@ class NexusPhpSite extends BaseSite {
     /** @type {seedingPage} */
     const result = { pagesCount: 0, seedingTorrents: [] }
     return result
+  }
+
+  /**
+   * Torrent seeds parser
+   * @param {JQuery} query
+   * @returns {number} number of seeding peers
+   */
+  _parseTorrentSeeds (query) {
+    return parseInt(query.text())
+  }
+
+  /**
+   * Torrent leeches parser
+   * @param {JQuery} query
+   * @returns {number} number of leeching peers
+   */
+  _parseTorrentLeeches (query) {
+    return parseInt(query.text())
+  }
+
+  /**
+   * Torrent snatched parser
+   * @param {JQuery} query
+   * @returns {number} number of snatched
+   */
+  _parseTorrentSnatched (query) {
+    return parseInt(query.text())
   }
 
   /**
@@ -321,19 +348,20 @@ class NexusPhpSite extends BaseSite {
    * @returns {torrentBasic[]} list of seeding torrents with id and size
    */
   _parseSeedingTorrents (query) {
+    const table = query.find('#ka1').find('table')
     const tdParserList = [
       {
         name: 'id',
         index: 1,
-        parseFunction: p => this._parseTorrentId(p)
+        parseFunction: q => this._parseTorrentId(q)
       },
       {
         name: 'size',
         index: 2,
-        parseFunction: p => this._parseTorrentSize(p)
+        parseFunction: q => this._parseTorrentSize(q)
       }
     ]
-    return this._parseChartTable(query.find('table'), tdParserList)
+    return this._parseChartTable(table, tdParserList)
   }
 
   /**
