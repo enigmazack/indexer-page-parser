@@ -1,209 +1,347 @@
 const BaseSite = require('./base-site')
 
 class NexusPhpSite extends BaseSite {
-  // constructor (config) {
-  //   super(config)
-  // }
+  constructor (config) {
+    super(config)
+    this.torrentTableIndex = {
+      category: 0,
+      title: 1,
+      date: 3,
+      size: 4,
+      seeds: 5,
+      leeches: 6,
+      snatched: 7
+    }
+  }
 
-  pageParser (query, url) {
+  /**
+   * @typedef userBasic
+   * @type {object}
+   * @property {number} userId - user id
+   * @property {string} userName - user name
+   * @property {number} unreadMessage - number of unread messages
+   */
+
+  /**
+   * @typedef userDetails
+   * @type {object}
+   * @property {string} userClass - user class
+   * @property {number} uploadTraffic - upload traffic
+   * @property {number} downloadTraffic - download traffic
+   * @property {number} bonus - bonus
+   * @property {number} joinDate - join date
+   * @property {torrentBasic[]} seedingTorrents - list of seeding torrents
+   */
+
+  /**
+   * @typedef torrentBasic
+   * @type {object}
+   * @property {number} id - torrent id
+   * @property {number} size - torrent size
+   */
+
+  /**
+   * @typedef torrentPromotion
+   * @type {object}
+   * @property {boolean} isFreeleech - is freeleech
+   * @property {string} type - promotion type
+   * @property {number} deadline - promotion deadline
+   */
+
+  /**
+   * @typedef torrentStatus
+   * @type {object}
+   * @property {boolean} isActive - is active
+   * @property {number} progress - percentage of progress
+   */
+
+  /**
+   * @typedef torrentDetails
+   * @type {object}
+   * @property {number} category - category
+   * @property {number} id - torrent id
+   * @property {string} title - torrent title
+   * @property {string} subtitle - torrent subtitle
+   * @property {boolean} isFreeleech - is freeleech
+   * @property {number} promotionDeadline - promotion deadline
+   * @property {string[]} tags - list of tags
+   * @property {number} date - torrent release date
+   * @property {number} size - torrent size
+   * @property {number} seeds - number of seeding peers
+   * @property {number} leeches - number of leeching peers
+   * @property {number} snatched - number of snatched
+   * @property {boolean} isActive - is seeding of leeching
+   * @property {number} progress - percentage of progress
+   */
+
+  /**
+   * The main method, the entry of different pages parser
+   * @param {JQueryStatic} $ - the jquery function
+   * @param {string} url - the request url
+   * @returns {userBasic} parsed results
+   */
+  pageParser ($, url) {
     const path = new URL(url).pathname
     switch (path) {
       case '/index.php':
-        return this._indexPageParser(query)
+        return this._indexPageParser($)
       case '/torrents.php':
-        return this._torrentPageParser(query)
+        return this._torrentPageParser($)
       case '/userdetails.php':
-        return this._userPageParser(query)
+        return this._userPageParser($)
       default:
         return {}
     }
   }
 
-  _indexPageParser (query) {
+  /**
+   * Index page parser
+   * @param {JQueryStatic} $ - jQuery function of the page
+   * @returns {userBasic} parsed results
+   */
+  _indexPageParser ($) {
     // parse user id
-    const userQuery = query('a[href*="userdetails.php?id="]').first()
+    const userQuery = $('a[href*="userdetails.php?id="]').first()
     const userId = parseInt(userQuery.attr('href').match(/id=(\d+)/)[1])
     const userName = userQuery.text()
     // parse unread message
-    const unreadMessage = this._parseMessage(query)
-    return {
-      userId,
-      userName,
-      unreadMessage
-    }
+    const unreadMessage = this._parseMessage($('body'))
+    return { userId, userName, unreadMessage }
   }
 
-  _parseMessage (query) {
-    const messageQuery = query('a[href*="messages.php"]').first().parent()
-    return parseInt(messageQuery.text().match(/\((\d+).+(新|New)\)/)[1])
-  }
-
-  _userPageParser (query) {
-    // parse user class
-    const classQuery = query(
-      'td.rowhead:contains("等级"), td.rowhead:contains("等級"), td.rowhead:contains("Class")'
-    ).next().find('img')
-    const userClass = classQuery.attr('title')
-    // parse upload/download traffic
-    const ratioQuery = query(
-      'td.rowhead:contains("传输"), td.rowhead:contains("傳送"), td.rowhead:contains("Transfers")'
-    ).next()
-    let uploadTraffic = ratioQuery.text().match(/(上[传傳]量|Uploaded).+?([\d.]+ ?[ZEPTGMK]?B)/)[2]
-    uploadTraffic = this._parseSize(uploadTraffic)
-    let downloadTraffic = ratioQuery.text().match(/(下[载載]量|Downloaded).+?([\d.]+ ?[ZEPTGMK]?B)/)[2]
-    downloadTraffic = this._parseSize(downloadTraffic)
-    // parse bonus
-    const bonusQuery = this._queryAny(query('body'), [
-      'td.rowhead:contains("魔力")',
-      'td.rowhead:contains("Karma")',
-      'td.rowhead:contains("积分")',
-      'td.rowhead:contains("積分")'
-    ]).next()
-    const bonus = this._parseBonus(bonusQuery)
-    // parse join date
-    const joinDateQuery = query(
-      'td.rowhead:contains("加入日期"), td.rowhead:contains("Join")'
-    ).next()
-    let joinDate = joinDateQuery.text().match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)[0]
-    joinDate = new Date(joinDate).getTime()
+  /**
+   * user page parser
+   * @param {JQueryStatic} $ - jQuery function of the page
+   * @returns {userDetails} parsed results
+   */
+  _userPageParser ($) {
+    const parserList = [
+      {
+        name: 'userClass',
+        keywords: ['等级', '等級', 'Class'],
+        parseFunction: q => this._parseUserClass(q)
+      },
+      {
+        name: 'uploadTraffic',
+        keywords: ['传输', '傳送', 'Transfers'],
+        parseFunction: q => this._parserUploadTraffic(q)
+      },
+      {
+        name: 'downloadTraffic',
+        keywords: ['传输', '傳送', 'Transfers'],
+        parseFunction: q => this._parserDownloadTraffic(q)
+      },
+      {
+        name: 'bonus',
+        keywords: ['魔力', 'Karma', '积分', '積分'],
+        parseFunction: q => this._parseBonus(q)
+      },
+      {
+        name: 'joinDate',
+        keywords: ['加入日期', 'join'],
+        parseFunction: q => this._parseJoinDate(q)
+      }
+    ]
+    const result = this._parsePairwiseTable($('body'), 'td.rowhead', parserList)
     // parse seeding torrents
-    const seedingTorrentsQuery = query('#ka1')
-    const seedingTorrents = this._parseSeedingTorrents(seedingTorrentsQuery)
-    return {
-      // userName,
-      userClass,
-      uploadTraffic,
-      downloadTraffic,
-      bonus,
-      joinDate,
-      seedingTorrents
-    }
+    result.seedingTorrents = this._parseSeedingTorrents($('#ka1'))
+    return result
   }
 
-  _parseBonus (query) {
-    return this._parseNumber(query.text())
-  }
-
-  _parseSeedingTorrents (query) {
-    if (query.find('table').length === 0) {
-      return []
-    }
-    const torrentList = []
-    const table = query.find('table')
-    const trList = table.find('> tbody > tr')
-    const index = { title: 1, size: 2 }
-    for (let i = 1; i < trList.length; i++) {
-      const torrent = {}
-      const tdList = trList.eq(i).find('> td')
-      const titleQuery = tdList.eq(index.title).find('a[href*="details.php?id="]')
-      torrent.id = parseInt(titleQuery.attr('href').match(/id=(\d+)/)[1])
-      torrent.size = this._parseSize(tdList.eq(index.size).text())
-      torrentList.push(torrent)
-    }
-    return torrentList
-  }
-
+  /**
+   * torrent page parser
+   * @param {JQuery} query
+   * @returns {torrentDetails[]} list of torrent details information
+   */
   _torrentPageParser (query) {
     // return [] if nothing found
     if (/没有种子|沒有種子|Nothing found/.test(query('body').text())) {
       return []
     }
-    const torrentList = []
     const table = query('table.torrents, table.torrent_list').last()
-    const trList = table.find('> tbody > tr')
-    const tdLength = trList.eq(1).find('> td').length
-    const index = this._getTorrentTableIndex(tdLength)
-    for (let i = 1; i < trList.length; i++) {
-      const torrent = {}
-      const tdList = trList.eq(i).find('> td')
-      // parse category
-      const categoryQuery = tdList.eq(index.category).find('a[href*="?cat="]')
-      torrent.category = parseInt(categoryQuery.attr('href').match(/cat=(\d+)/)[1])
-      // parse title and id
-      const titleQuery = tdList.eq(index.title).find('a[href*="details.php?id="]')
-      torrent.title = titleQuery.attr('title')
-      torrent.id = parseInt(titleQuery.attr('href').match(/id=(\d+)/)[1])
-      // parse subTitle
-      torrent.subTitle = this._parseSubTitle(tdList.eq(index.title))
-      // parse promotion status
-      const promotion = this._parsePromotion(tdList.eq(index.title))
-      torrent.isFreeleech = promotion.isFreeleech
-      torrent.promotionDeadline = promotion.deadline || 0
-      // parse tags other than promotion
-      const tags = this._parseTags(tdList.eq(index.title))
-      if ({}.hasOwnProperty.call(promotion, 'type')) {
-        tags.push(promotion.type)
+    // const tdLength = table.find('> tbody > tr').eq(1).find('> td').length
+    // const index = this._getTorrentTableIndex(tdLength)
+    const index = this.torrentTableIndex
+    const tdParserList = [
+      {
+        name: 'category',
+        index: index.category,
+        parseFunction: q => this._parseTorrentCategory(q)
+      },
+      {
+        name: 'id',
+        index: index.title,
+        parseFunction: q => this._parseTorrentId(q)
+      },
+      {
+        name: 'title',
+        index: index.title,
+        parseFunction: q => this._parseTorrentTitle(q)
+      },
+      {
+        name: 'subtitle',
+        index: index.title,
+        parseFunction: q => this._parseTorrentSubtitle(q)
+      },
+      {
+        name: 'tags',
+        index: index.tags,
+        parseFunction: q => this._parseTorrentTags(q)
+      },
+      {
+        name: 'date',
+        index: index.date,
+        parseFunction: q => this._parseTorrentDate(q)
+      },
+      {
+        name: 'size',
+        index: index.size,
+        parseFunction: q => this._parseTorrentSize(q)
+      },
+      {
+        name: 'seeds',
+        index: index.seeds,
+        parseFunction: q => parseInt(q.text())
+      },
+      {
+        name: 'leeches',
+        index: index.leeches,
+        parseFunction: q => parseInt(q.text())
+      },
+      {
+        name: 'snatched',
+        index: index.snatched,
+        parseFunction: q => parseInt(q.text())
+      },
+      {
+        name: 'promotion',
+        index: index.title,
+        parseFunction: q => this._parseTorrentPromotion(q)
+      },
+      {
+        name: 'status',
+        index: index.title,
+        parseFunction: q => this._parseTorrentStatus(q)
       }
-      torrent.tags = tags
-      // parse date
-      torrent.date = this._parseDate(tdList.eq(index.date))
-      // parse size
-      torrent.size = this._parseSize(tdList.eq(index.size).text())
-      // parse seeds
-      torrent.seeds = parseInt(tdList.eq(index.seeds).text())
-      // parse leeches
-      torrent.leeches = parseInt(tdList.eq(index.leeches).text())
-      // parse snatched
-      torrent.snatched = parseInt(tdList.eq(index.snatched).text())
-      // parse status
-      const status = this._parseStatus(tdList, index)
-      Object.assign(torrent, status)
-      // push torrent info into torrentList
-      torrentList.push(torrent)
-    }
+    ]
+    const torrentList = this._parseChartTable(table, tdParserList)
+    // flatten torrentList
+    torrentList.forEach(torrent => {
+      if (torrent.promotion.type) torrent.tags.push(torrent.promotion.type)
+      torrent.isFreeleech = torrent.promotion.isFreeleech
+      torrent.promotionDeadline = torrent.promotion.deadline
+      torrent.isActive = torrent.status.isActive
+      torrent.progress = torrent.status.progress
+      delete torrent.promotion
+      delete torrent.status
+    })
     return torrentList
   }
 
-  _parseDate (query) {
-    const dateQuery = query.find('> span')
-    return new Date(dateQuery.attr('title')).getTime()
+  /**
+   * message number parser
+   * @param {JQuery} query - query contains message info
+   * @returns {number} number of unread messages
+   */
+  _parseMessage (query) {
+    const messageQuery = query.find('a[href*="messages.php"]').first().parent()
+    return parseInt(messageQuery.text().match(/\((\d+).+(新|New)\)/)[1])
   }
 
-  _getTorrentTableIndex (tdLength) {
-    return {
-      category: 0,
-      title: 1,
-      comments: 2,
-      date: 3,
-      size: 4,
-      seeds: 5,
-      leeches: 6,
-      snatched: 7,
-      status: tdLength - 2,
-      uploader: tdLength - 1
-    }
+  /**
+   * User class parser
+   * @param {JQuery} query
+   * @returns {string} user class
+   */
+  _parseUserClass (query) {
+    return query.find('img').attr('title')
   }
 
-  _parseStatus (query, index) {
-    if ({}.hasOwnProperty.call(index, 'status')) {
-      const text = query.eq(index.status).text()
-      const isActive = /peer-active/.test(query.eq(index.status).attr('class'))
-      const progress = /-/.test(text) ? 0 : parseFloat(text)
-      return {
-        isActive,
-        progress
+  /**
+   * Upload traffic parser
+   * @param {JQuery} query
+   * @returns {number} - bytes of upload traffic
+   */
+  _parserUploadTraffic (query) {
+    const traffic = query.text().match(/(上[传傳]量|Uploaded).+?([\d.]+ ?[ZEPTGMK]?B)/)[2]
+    return this._parseSize(traffic)
+  }
+
+  /**
+   * Download traffic parser
+   * @param {JQuery} query
+   * @returns {number} - bytes of download traffic
+   */
+  _parserDownloadTraffic (query) {
+    const traffic = query.text().match(/(下[载載]量|Downloaded).+?([\d.]+ ?[ZEPTGMK]?B)/)[2]
+    return this._parseSize(traffic)
+  }
+
+  /**
+   * Join date parser
+   * @param {JQuery} query
+   * @returns {number} - timestamp of user join date
+   */
+  _parseJoinDate (query) {
+    const joinDate = query.text().match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)[0]
+    return new Date(joinDate).getTime()
+  }
+
+  /**
+   * Bonus parser
+   * @param {JQuery} query
+   * @returns {number} bonus
+   */
+  _parseBonus (query) {
+    return this._parseNumber(query.text())
+  }
+
+  /**
+   * Seeding torrents parser
+   * @param {JQuery} query
+   * @returns {torrentBasic[]} list of seeding torrents with id and size
+   */
+  _parseSeedingTorrents (query) {
+    const tdParserList = [
+      {
+        name: 'id',
+        index: 1,
+        parseFunction: p => this._parseTorrentId(p)
+      },
+      {
+        name: 'size',
+        index: 2,
+        parseFunction: p => this._parseTorrentSize(p)
       }
-    } else {
-      return {
-        isActive: false,
-        progress: 0
-      }
-    }
+    ]
+    return this._parseChartTable(query.find('table'), tdParserList)
   }
 
-  _parseSubTitle (query) {
-    const subTitleQuery = query.find('a[href*="details.php?id="]').last().parent()
-    return subTitleQuery.html().split('>').pop()
+  /**
+   * Torrent id parser
+   * @param {JQuery} query
+   * @returns {number} torrent id
+   */
+  _parseTorrentId (query) {
+    const id = query.find('a[href*="details.php?id="]').attr('href').match(/id=(\d+)/)[1]
+    return parseInt(id)
   }
 
-  _parseTags (query) {
-    const tags = []
-    if (query.find('img[alt*="Stick"]').length) tags.push('Sticky')
-    return tags
+  /**
+   * Torrent size parser
+   * @param {JQuery} query
+   * @returns {number} bytes of torrent size
+   */
+  _parseTorrentSize (query) {
+    return this._parseSize(query.text())
   }
 
-  _parsePromotion (query) {
-    const promotion = {}
+  /**
+   * Torrent promotion parser
+   * @param {JQuery} query
+   * @returns {torrentPromotion} torrent promotion information
+   */
+  _parseTorrentPromotion (query) {
     let type = ''
     let isFreeleech = false
     switch (true) {
@@ -229,16 +367,197 @@ class NexusPhpSite extends BaseSite {
         break
       default:
     }
-    promotion.isFreeleech = isFreeleech
-    if (type) {
-      promotion.type = type
-    }
     const dateMatch = query.html().match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)
-    if (dateMatch) {
-      promotion.deadline = new Date(dateMatch[0]).getTime()
-    }
-    return promotion
+    const deadline = dateMatch ? new Date(dateMatch[0]).getTime() : 0
+    return { isFreeleech, type, deadline }
   }
+
+  /**
+   * Torrent status parser
+   * @param {JQuery} query
+   * @returns {torrentStatus} torrent status information
+   */
+  _parseTorrentStatus () {
+    return { isActive: false, progress: 0 }
+  }
+
+  /**
+   * Torrent tags parser
+   * @param {JQuery} query
+   * @returns {string[]} list of tags
+   */
+  _parseTorrentTags (query) {
+    const tags = []
+    if (query.find('img[alt*="Stick"]').length) tags.push('Sticky')
+    return tags
+  }
+
+  /**
+   * Torrent title parser
+   * @param {JQuery} query
+   * @returns {string} torrent title
+   */
+  _parseTorrentTitle (query) {
+    return query.find('a[href*="details.php?id="]').attr('title')
+  }
+
+  /**
+   * Torrent subtitle parser
+   * @param {JQuery} query
+   * @returns {string} torrent subtitle
+   */
+  _parseTorrentSubtitle (query) {
+    const SubtitleQuery = query.find('a[href*="details.php?id="]').last().parent()
+    return SubtitleQuery.html().split('>').pop()
+  }
+
+  /**
+   * Torrent date parser
+   * @param {JQuery} query
+   * @returns {number} timestamp of torrent release date
+   */
+  _parseTorrentDate (query) {
+    return new Date(query.find('> span').attr('title')).getTime()
+  }
+
+  /**
+   * Torrent category parser
+   * @param {JQuery} query
+   * @returns {number} category number
+   */
+  _parseTorrentCategory (query) {
+    const category = query.find('a[href*="?cat="]').attr('href').match(/cat=(\d+)/)[1]
+    return parseInt(category)
+  }
+  //   const trList = table.find('> tbody > tr')
+  //   const tdLength = trList.eq(1).find('> td').length
+  //   const index = this._getTorrentTableIndex(tdLength)
+  //   for (let i = 1; i < trList.length; i++) {
+  //     const torrent = {}
+  //     const tdList = trList.eq(i).find('> td')
+  //     // parse category
+  //     const categoryQuery = tdList.eq(index.category).find('a[href*="?cat="]')
+  //     torrent.category = parseInt(categoryQuery.attr('href').match(/cat=(\d+)/)[1])
+  //     // parse title and id
+  //     const titleQuery = tdList.eq(index.title).find('a[href*="details.php?id="]')
+  //     torrent.title = titleQuery.attr('title')
+  //     torrent.id = parseInt(titleQuery.attr('href').match(/id=(\d+)/)[1])
+  //     // parse Subtitle
+  //     torrent.Subtitle = this._parseSubtitle(tdList.eq(index.title))
+  //     // parse promotion status
+  //     const promotion = this._parsePromotion(tdList.eq(index.title))
+  //     torrent.isFreeleech = promotion.isFreeleech
+  //     torrent.promotionDeadline = promotion.deadline || 0
+  //     // parse tags other than promotion
+  //     const tags = this._parseTags(tdList.eq(index.title))
+  //     if ({}.hasOwnProperty.call(promotion, 'type')) {
+  //       tags.push(promotion.type)
+  //     }
+  //     torrent.tags = tags
+  //     // parse date
+  //     torrent.date = this._parseDate(tdList.eq(index.date))
+  //     // parse size
+  //     torrent.size = this._parseSize(tdList.eq(index.size).text())
+  //     // parse seeds
+  //     torrent.seeds = parseInt(tdList.eq(index.seeds).text())
+  //     // parse leeches
+  //     torrent.leeches = parseInt(tdList.eq(index.leeches).text())
+  //     // parse snatched
+  //     torrent.snatched = parseInt(tdList.eq(index.snatched).text())
+  //     // parse status
+  //     const status = this._parseStatus(tdList, index)
+  //     Object.assign(torrent, status)
+  //     // push torrent info into torrentList
+  //     torrentList.push(torrent)
+  //   }
+  //   return torrentList
+  // }
+
+  // _parseDate (query) {
+  //   const dateQuery = query.find('> span')
+  //   return new Date(dateQuery.attr('title')).getTime()
+  // }
+
+  // _getTorrentTableIndex (tdLength) {
+  //   return {
+  //     category: 0,
+  //     title: 1,
+  //     comments: 2,
+  //     date: 3,
+  //     size: 4,
+  //     seeds: 5,
+  //     leeches: 6,
+  //     snatched: 7,
+  //     status: tdLength - 2,
+  //     uploader: tdLength - 1
+  //   }
+  // }
+
+  // _parseStatus (query, index) {
+  //   if ({}.hasOwnProperty.call(index, 'status')) {
+  //     const text = query.eq(index.status).text()
+  //     const isActive = /peer-active/.test(query.eq(index.status).attr('class'))
+  //     const progress = /-/.test(text) ? 0 : parseFloat(text)
+  //     return {
+  //       isActive,
+  //       progress
+  //     }
+  //   } else {
+  //     return {
+  //       isActive: false,
+  //       progress: 0
+  //     }
+  //   }
+  // }
+
+  // _parseSubtitle (query) {
+  //   const SubtitleQuery = query.find('a[href*="details.php?id="]').last().parent()
+  //   return SubtitleQuery.html().split('>').pop()
+  // }
+
+  // _parseTags (query) {
+  //   const tags = []
+  //   if (query.find('img[alt*="Stick"]').length) tags.push('Sticky')
+  //   return tags
+  // }
+
+  // _parsePromotion (query) {
+  //   const promotion = {}
+  //   let type = ''
+  //   let isFreeleech = false
+  //   switch (true) {
+  //     case !!query.find('img.pro_free').length:
+  //       type = 'Free'
+  //       isFreeleech = true
+  //       break
+  //     case !!query.find('img.pro_free2up').length:
+  //       type = '2xFree'
+  //       isFreeleech = true
+  //       break
+  //     case !!query.find('img.pro_2up').length:
+  //       type = '2xUp'
+  //       break
+  //     case !!query.find('img.pro_50pctdown2up').length:
+  //       type = '2x50%'
+  //       break
+  //     case !!query.find('img.pro_30pctdown').length:
+  //       type = '30%'
+  //       break
+  //     case !!query.find('img.pro_50pctdown').length:
+  //       type = '50%'
+  //       break
+  //     default:
+  //   }
+  //   promotion.isFreeleech = isFreeleech
+  //   if (type) {
+  //     promotion.type = type
+  //   }
+  //   const dateMatch = query.html().match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)
+  //   if (dateMatch) {
+  //     promotion.deadline = new Date(dateMatch[0]).getTime()
+  //   }
+  //   return promotion
+  // }
 }
 
 module.exports = NexusPhpSite

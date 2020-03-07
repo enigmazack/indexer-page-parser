@@ -82,16 +82,17 @@ class BaseSite {
    */
   _parsePairwiseTable (query, selector, parserList) {
     const result = {}
-    parserList.forEach(parser => {
-      if (!Array.isArray(parser.keywords)) parser.keywords = [parser.keywords]
+    // parserList.forEach(parser => {
+    for (const parser of parserList) {
+      const keywords = Array.isArray(parser.keywords) ? parser.keywords : [parser.keywords]
       const selectorList = []
-      parser.keywords.forEach(key => {
+      keywords.forEach(key => {
         selectorList.push(`${selector}:contains("${key}")`)
       })
       const keyQuery = this._queryAny(query, selectorList)
       const valueQuery = keyQuery.next()
       result[parser.name] = parser.parseFunction(valueQuery)
-    })
+    }
     return result
   }
 
