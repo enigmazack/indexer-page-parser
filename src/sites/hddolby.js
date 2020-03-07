@@ -6,15 +6,17 @@ const hddolby = new NexusPhpSite({
 
 hddolby.torrentTableIndex.status = 8
 
+hddolby._parseTorrentStatus = function (query) {
+  const progress = /-/.test(query.text()) ? 0 : parseFloat(query.text())
+  // hddolby is absent for active identification
+  return { isActive: false, progress }
+}
+
 hddolby._parseTorrentTags = function (query) {
   const tags = []
   if (query.find('img[alt*="Sticky"]').length) tags.push('Sticky')
   if (query.find('font.classic').length) tags.push('Official')
   return tags
-}
-
-hddolby._parseTorrentStatus = function (query) {
-  
 }
 
 module.exports = hddolby
