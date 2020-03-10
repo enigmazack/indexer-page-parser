@@ -3,6 +3,7 @@
 // helps checking the results when developing
 const process = require('process')
 const pageParser = require('../src/index')
+// const pageParser = require('../dist/page-parser')
 const getQueries = require('./utils/get-queries')
 const sitesConfig = require('./request-config.json').sites
 const { nexusphpPages } = require('./common-configs')

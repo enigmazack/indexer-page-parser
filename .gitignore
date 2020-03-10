@@ -1,4 +1,4 @@
 node_modules/
-
+dist/
 pages/
 scripts/request-config.json

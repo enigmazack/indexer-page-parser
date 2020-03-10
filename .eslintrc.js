@@ -29,6 +29,7 @@ module.exports = {
       ]
     },
     "ignorePatterns": [
-      "pages/"
+      "pages/",
+      "dist/"
     ]
 };
