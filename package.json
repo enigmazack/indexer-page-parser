@@ -1,14 +1,14 @@
 {
   "name": "indexer-page-parser",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "page parser for private trackers",
+  "main": "src/index.js",
   "scripts": {
     "test": "mocha",
     "build": "webpack"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {},
   "devDependencies": {
     "axios": "^0.19.2",
